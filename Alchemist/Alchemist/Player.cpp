@@ -1,19 +1,18 @@
 #include "Player.h"
 
 RawInputManager *	Player::inputManager =	NULL;
-Camera *			Player::camera =		NULL;
 
-Player::Player(void) : GameObject()
+Player::Player(void) : Character()
 {
 	
 }
 
-Player::Player(char *fileBase) : GameObject(fileBase)
+Player::Player(char *fileBase) : Character(fileBase)
 {
 	position = D3DXVECTOR3(0,0,0);
 }
 
-Player::Player(short ID) : GameObject(ID)
+Player::Player(short ID) : Character(ID)
 {
 	
 }
@@ -23,6 +22,7 @@ Player::~Player(void)
 	
 }
 
+/*
 int Player::initBullet()
 {
 	float SCALE = 1;
@@ -60,10 +60,10 @@ int Player::initBullet()
 
 	return 0;
 }
+*/
 
 int Player::initGeom()
 {
-	camera->setWorldPointer(&worldMatrix);
 	GameObject::initGeom();
 	//body->activate(true);
 	//body->translate(btVector3(position.x, position.y, position.z));
@@ -72,49 +72,25 @@ int Player::initGeom()
 
 int Player::update(long time)
 {
-	if (!physInit)
-	{
-		initBullet();
-		physInit = true;
-	}
-	//body->activate(true);
-	
-	
-	setRotation(camera->getRotation());
-	setAcceleration(0, -0.05f, 0);
-	
-	float y = scale.y;//10 + ocean->getHeight(position, time);
+	direction = D3DXVECTOR3(0,0,0);
 
-	if (position.y <= y)
-	{
-		position.y = y;
-		setVelocity(0,0,0);
-
-		if (inputManager->getKey('W')) moveForward();
-		if (inputManager->getKey('S')) moveBackward();
-		if (inputManager->getKey('D')) moveRight();
-		if (inputManager->getKey('A')) moveLeft();
+	if (inputManager->getKey('W') > 0) moveUp();
+	if (inputManager->getKey('S') > 0) moveDown();
+	if (inputManager->getKey('D') > 0) moveRight();
+	if (inputManager->getKey('A') > 0) moveLeft();
 			
-		if (inputManager->getKey(VK_SPACE)) modVelocity(0,1,0);
-	}
-
-	velocity += acceleration;
-	position += velocity;
-	
-	/*if (position.y <= y && velocity.y < 0)
+	float finalSpeed = speed;
+	if (abs(direction.x) + abs(direction.y) > 1)
 	{
-		position.y = y;
-	    velocity.y = 0;
-	}*/
+		finalSpeed *= 0.70710678;
+	}
+	position += finalSpeed * direction;
 
-	//position.y = sin(time*0.01+offset)*10;
-	
-
-	//GameObject::update(time);
 
 	//body->activate(true);
 	//body->translate(btVector3(velocity.x, velocity.y, velocity.z));
 	
+	/*
 	#pragma region Calculate World Matrix
 	D3DXMATRIX scaleMatrix, translationMatrix, rotationMatrix;
 	
@@ -127,27 +103,6 @@ int Player::update(long time)
 	#pragma endregion
 	
 	#pragma region Set Physics Object Transform
-	/*
-	btTransform * bulletTransformMatrix = &body->getWorldTransform();
-	btVector3 R = bulletTransformMatrix->getBasis().getColumn(0);
-	btVector3 U = bulletTransformMatrix->getBasis().getColumn(1);
-	btVector3 L = bulletTransformMatrix->getBasis().getColumn(2);
-	btVector3 P = bulletTransformMatrix->getOrigin();
-				
-	D3DXVECTOR3 vR, vU, vL, vP;
-	vR.x = R.x();vR.y = R.y();vR.z = R.z();
-	vU.x = U.x();vU.y = U.y();vU.z = U.z();
-	vL.x = L.x();vL.y = L.y();vL.z = L.z();
-	vP.x = P.x();vP.y = P.y();vP.z = P.z();
-
-	D3DXMATRIX matOutput;
-	matOutput._11 = vR.x;matOutput._12 = vR.y;matOutput._13 = vR.z;matOutput._14 = 0.f;
-	matOutput._21 = vU.x;matOutput._22 = vU.y;matOutput._23 = vU.z;matOutput._24 = 0.f;
-	matOutput._31 = vL.x;matOutput._32 = vL.y;matOutput._33 = vL.z;matOutput._34 = 0.f;
-	matOutput._41 = vP.x;matOutput._42 = vP.y;matOutput._43 = vP.z;matOutput._44 = 1.f;
-	*/
-
-	
 	btTransform bulletTransformMatrix;
 	btVector3 R,U,L,P;
 	R.setX(btScalar(worldMatrix._11)); R.setY(btScalar(worldMatrix._12)); R.setZ(btScalar(worldMatrix._13));
@@ -166,21 +121,21 @@ int Player::update(long time)
 	worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 
 	#pragma endregion
-	
-
-	//GameObject::update(time);
+	*/
 
 	return 0;
 }
 
 int Player::renderFrame(long time)
 {
-	if (!physInit)
+	/*if (!physInit)
 	{
 		initBullet();
 		physInit = true;
-	}
-	return GameObject::renderFrame(time);
+	}*/
+	quad.setPos(position);
+	GameObject::renderFrame(time);
+	return 0;
 }
 
 int Player::setInputManager(RawInputManager * iManager)
@@ -188,16 +143,6 @@ int Player::setInputManager(RawInputManager * iManager)
 	if (iManager) 
 	{
 		inputManager = iManager;
-		return 0;
-	}
-	return -1;
-}
-
-int Player::setCamera(Camera * cam)
-{
-	if (cam)
-	{
-		camera = cam;
 		return 0;
 	}
 	return -1;

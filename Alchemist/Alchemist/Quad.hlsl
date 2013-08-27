@@ -5,10 +5,10 @@ sampler TexS = sampler_state
 {
 	Texture = <tex>;
 	MinFilter = LINEAR;
-	MagFilter = LINEAR;
-	//MipFilter = LINEAR;
-	AddressU = CLAMP;
-	AddressV = CLAMP;
+	MagFilter = POINT;
+	MipFilter = LINEAR;
+	//AddressU = CLAMP;
+	//AddressV = CLAMP;
 };
 
 struct VertexData

@@ -13,6 +13,7 @@
 #define FIRST_PERSON 0
 #define THIRD_PERSON 1
 #define THIRD_PERSON_FIXED 2
+#define CAMERA_2D 3
 
 class Camera
 {

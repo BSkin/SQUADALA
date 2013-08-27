@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GameObject.h"
+#include "Character.h"
 #include "RawInputManager.h"
 #include "Camera.h"
 
-class Player : public GameObject
+class Player : public Character
 {
 public:
 	Player(void);
@@ -16,12 +16,9 @@ public:
 	virtual int renderFrame(long time);
 
 	static int setInputManager(RawInputManager *);
-	static int setCamera(Camera *);
 
 private:
-	virtual int initBullet();
 	virtual int initGeom();
 
 	static RawInputManager * inputManager;
-	static Camera * camera;
 };

@@ -1,7 +1,17 @@
-matrix worldViewProj;
-uniform extern texture tex;
-float time;
+extern float4x4 worldViewProj;
+extern texture tex;
 
+sampler TexS = sampler_state 
+{
+	Texture = <tex>;
+	MinFilter = LINEAR;
+	MagFilter = LINEAR;
+	//MipFilter = LINEAR;
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+};
+
+/*
 sampler TexS = sampler_state	// sampler for the texture
 {
 	Texture = <tex>;
@@ -11,6 +21,7 @@ sampler TexS = sampler_state	// sampler for the texture
     //MagFilter = Linear;
     //MipFilter = Linear;
 };
+*/
 
 struct VertexData
 {

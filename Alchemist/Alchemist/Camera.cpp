@@ -1,12 +1,13 @@
 #include "camera.h"
 #include <cmath>
 
-Camera::Camera(void) : position(0.0,0.0,-40.0), lookAt(0.0,0.0,0.0), 
+Camera::Camera(void) : position(0.0,0.0,-100.0), lookAt(0.0,0.0,0.0), 
 	orthogonalView(false), 
-	cameraType(THIRD_PERSON), 
+	cameraType(CAMERA_2D), 
 	speed(1.0f), 
 	worldMatrix(0),
 	PI(atan(1)*4), verticalRotation(0.0f), horizontalRotation(0.0f), 
+	nearPlane(1.0f), farPlane(1000.0f),
 	cameraDistance(25.0f),
 	wndWidth(2000), wndHeight(2000)
 {
@@ -20,7 +21,7 @@ Camera::~Camera(void)
 
 void Camera::getViewMatrix(D3DXMATRIX * viewMatrix)
 {
-	if (orthogonalView)
+	if (orthogonalView || cameraType == CAMERA_2D)
 	{
 		D3DXVECTOR3 zero = D3DXVECTOR3(0,0,0);
 		D3DXVECTOR3 u = D3DXVECTOR3(0,1,0);
@@ -55,7 +56,7 @@ void Camera::getViewMatrix(D3DXMATRIX * viewMatrix)
 
 void Camera::getProjMatrix(D3DXMATRIX * matProj)
 {
-	if (orthogonalView == true)
+	if (orthogonalView == true || cameraType == CAMERA_2D)
 		D3DXMatrixOrthoLH(matProj, wndWidth, wndHeight, nearPlane, farPlane);
 	else 
 		D3DXMatrixPerspectiveFovLH(matProj, fieldOfView, aspectRatio, nearPlane, farPlane);
@@ -90,9 +91,9 @@ void Camera::turn(long x, long y)
 
 D3DXVECTOR3 Camera::getPosition() 
 { 
-	if (FIRST_PERSON) 
+	if (cameraType == CAMERA_2D || cameraType == FIRST_PERSON) 
 		return position; 
-	else if (THIRD_PERSON)
+	else if (cameraType == THIRD_PERSON)
 		return lookAt;
 }
 D3DXVECTOR3 Camera::getLookAtVector(void) { return  lookAtVector; }
@@ -119,6 +120,8 @@ void Camera::setPosition(D3DXVECTOR3 target)
 		position = target;
 	else if (cameraType == THIRD_PERSON)
 		lookAt = target; 
+	else if (cameraType == CAMERA_2D)
+		position = D3DXVECTOR3(0,0,-10);
 }
 void Camera::setPosition(float x, float y, float z) { setPosition(D3DXVECTOR3(x,y,z)); }
 
@@ -199,6 +202,13 @@ void Camera::updateCamera()
 		position.y += sin(verticalRotation) * cameraDistance;
 		position.x += sin(horizontalRotation) * cos(verticalRotation) * cameraDistance;
 		position.z += cos(horizontalRotation) * cos(verticalRotation) * cameraDistance;
+	}
+	else if (cameraType == CAMERA_2D)
+	{
+		verticalRotation = 0;
+		horizontalRotation = 0;
+		position = D3DXVECTOR3(0,0,-10);
+		lookAt = D3DXVECTOR3(0,0,0);
 	}
 	
 	lookAtVector = lookAt - position;

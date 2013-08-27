@@ -3,7 +3,7 @@
 #pragma region Game Constants
 #define WND_WIDTH 1280
 #define WND_HEIGHT 720
-#define FRAMES_PER_SECOND 10000
+#define FRAMES_PER_SECOND 60
 
 #define START_MENU	0
 #define PAUSE_MENU	1
@@ -332,10 +332,8 @@ int Game::init(void)
 	GameObject::setd3dDev(d3dDev);
 	GameObject::setAssetManager(assetManager);
 	//GameObject::setOcean(ocean);
-	GameObject::setSunDir(&sunDir);
-	GameObject::setBullet(&collisionShapes, dynamicsWorld);
+	RigidObject::setBullet(&collisionShapes, dynamicsWorld);
 	Player::setInputManager(inputManager);
-	Player::setCamera(&camera);
 	Model::setd3dDev(d3dDev);
 	SkinnedData::setd3dDev(d3dDev);
 	MenuWindow::setStatics(&camera, wndWidth, wndHeight);
@@ -481,7 +479,7 @@ int Game::update(long time)
 	#pragma region In Game
 	else if (gameState == IN_GAME)
 	{
-		SetCursorPos(wndWidth/2, wndHeight/2);
+		//SetCursorPos(wndWidth/2, wndHeight/2);
 
 		if (inputManager->getKey(VK_ESCAPE) == 1) 
 		{
@@ -498,6 +496,12 @@ int Game::update(long time)
 			changeState(IN_GAME);
 		}
 
+		//====================================================
+		//================= FIX PACKET FIRST =================
+		//====================================================
+		//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+		/*	
 		if (inputManager->getKey('P') == 1) 
 		{
 			if (networkState == ONLINE_STATE)
@@ -512,6 +516,12 @@ int Game::update(long time)
 			}
 		}
 
+		*/
+		//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		//====================================================
+		//================= FIX PACKET FIRST =================
+		//====================================================
+
 		list<GameObject *>::iterator iter;
 	
 		for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
@@ -520,9 +530,9 @@ int Game::update(long time)
 		}		
 
 		//player->setPosition(0, 10, 0);
-		camera.setPosition(player->getPosition());		
+		//camera.setPosition(player->getPosition());		
 
-		dynamicsWorld->stepSimulation(1.f/60.f,10);
+		//dynamicsWorld->stepSimulation(1.f/60.f,10);
 	}
 	#pragma endregion
 		
@@ -543,8 +553,8 @@ int Game::renderFrame(long time)
 	Quad::setMatrices(&viewMatrix, &projMatrix);
 
 	d3dDev->SetTransform(D3DTS_VIEW, &viewMatrix);
-	d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix); 
-	d3dDev->SetRenderState(D3DRS_ZENABLE, TRUE);
+	d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix);  
+	d3dDev->SetRenderState(D3DRS_ZENABLE, FALSE);
 	#pragma endregion
 
 	#pragma region Render to Screen Texture
@@ -556,13 +566,6 @@ int Game::renderFrame(long time)
 	#pragma region START MENU
 	if (gameState == START_MENU)
 	{
-		/*camera.setOrth(true);
-		camera.getViewMatrix(&viewMatrix);
-		camera.getProjMatrix(&projMatrix);
-		d3dDev->SetTransform(D3DTS_VIEW, &viewMatrix);
-		d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix);  
-		d3dDev->SetRenderState(D3DRS_ZENABLE, FALSE);
-		*/
 		list<MenuWindow *>::iterator iter;
 	
 		for (iter = menuObjects.begin(); iter != menuObjects.end(); iter++)
@@ -574,18 +577,13 @@ int Game::renderFrame(long time)
 
 	#pragma region IN GAME
 	else if (gameState == IN_GAME)
-	{
-		//floor->renderFrame(time);
-
+	{		
 		list<GameObject *>::iterator iter;
 	
 		for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
 		{
 			(*iter)->renderFrame(time); 
 		}
-
-		//ocean->render(camera.getPosition(), time);
-		
 		/*
 		d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
 		//draw debug wireframe stuff
@@ -595,8 +593,6 @@ int Game::renderFrame(long time)
 	#pragma endregion
 
 	d3dDev->EndScene();
-	//d3dDev->Present(NULL, NULL, NULL, NULL);
-	//return 0;
 	#pragma endregion
 
 	#pragma region Render to Backbuffer
@@ -720,7 +716,7 @@ int Game::renderFrame(long time)
 	}
 	#pragma endregion
 
-	#pragma region Draw FPS
+	#pragma region Draw Debug Text
 	RECT tr;
 	tr.top = 70;
 	tr.left = 50;
@@ -859,10 +855,10 @@ void Game::changeState(int targetState)
 		float rotation;
 		float maxDist = 10.0f;
 
-		player = new Player("Assets\\cube.x");
-		player->setPosition(0,50,0);
-		player->setRotation(0,0);
-		player->setScale(1,1,1);
+		player = new Player("Assets\\Face.png");
+		player->setPosition(0,0,1);
+		player->setSize(10,50);
+		//player->setScale(1,1,1);
 		gameObjects.push_front(player);
 
 		/*
@@ -901,8 +897,13 @@ void Game::changeState(int targetState)
 
 		MenuWindow * healthBars = new MenuWindow("Assets\\HealthTemp.png");
 		healthBars->setSize(300,75);
-		healthBars->setPosition(50, -50, BOT_LEFT);
+		healthBars->setPosition(50, 50, BOT_LEFT);
 		menuObjects.push_front(healthBars);
+
+		MenuWindow * healthBars2 = new MenuWindow("Assets\\HealthTemp.png");
+		healthBars2->setSize(300,75);
+		healthBars2->setPosition(50, -50, TOP_LEFT);
+		menuObjects.push_front(healthBars2);
 		/*
 		pauseWindow.init("Assets\\transtest.png");
 		pauseWindow.setSize(400,150);

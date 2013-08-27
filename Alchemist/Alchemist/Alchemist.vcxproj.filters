@@ -147,6 +147,12 @@
     <ClInclude Include="Player.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClInclude>
+    <ClInclude Include="RigidObject.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Alchemist.cpp">
@@ -198,6 +204,12 @@
       <Filter>Source Files\Engine Components\Networking</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidObject.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClCompile>
   </ItemGroup>

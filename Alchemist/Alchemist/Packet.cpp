@@ -20,7 +20,7 @@ char * Packet::serialize()
 	{
 		//char * tempPacket = new char[GO_SIZE]; 
 		char header[] = {'-', 'g'};
-
+		/*
 		memcpy(packet+index*GO_SIZE,		header,					2);
 
 		memcpy(packet+2+index*GO_SIZE,	&(*iter)->position.x,	4);
@@ -42,7 +42,7 @@ char * Packet::serialize()
 		memcpy(packet+44+index*GO_SIZE,	&(*iter)->ID,			2);
 
 		memcpy(packet+46+index*GO_SIZE,	&(*iter)->assetIndex,	2);
-
+		*/
 		index++;
 	}
 
@@ -80,11 +80,12 @@ void Packet::deserialize(char * packet)
 			if (temp == NULL) //Add GameObject
 			{
 				temp = new GameObject((short)packet[i+46]);
-				if (temp->assetIndex == 4) temp->setScale(0.1,0.1,0.1);
+				//if (temp->assetIndex == 4) temp->setScale(0.1,0.1,0.1);
 				memcpy(&temp->ID, &packet[i+44], 4);
 				gameObjects->push_back(temp);
 			}
 			
+			/*
 			memcpy(&temp->position.x, &packet[i+2], 4);
 			memcpy(&temp->position.y, &packet[i+6], 4);
 			memcpy(&temp->position.z, &packet[i+10], 4);
@@ -100,7 +101,8 @@ void Packet::deserialize(char * packet)
 			memcpy(&temp->horizontalRotation, &packet[i+38], 4);
 
 			memcpy(&temp->animationIndex, &packet[i+42], 2);
-			
+			*/
+
 			i+=GO_SIZE;
 		}
 	}

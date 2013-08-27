@@ -7,20 +7,15 @@ D3DXMATRIX *		GameObject::viewMatrix =		NULL;
 D3DXMATRIX *		GameObject::projMatrix =		NULL;
 D3DXVECTOR3			GameObject::cameraPosition =	D3DXVECTOR3(0,0,0);
 short				GameObject::currentID =			0;
-D3DXVECTOR3 *		GameObject::sunDir =			NULL;
 
-btAlignedObjectArray<btCollisionShape*> *	GameObject::collisionShapes =	NULL;
-btDiscreteDynamicsWorld *					GameObject::dynamicsWorld =		NULL;
-
-
-GameObject::GameObject(void) : scale(1.0f,1.0f,1.0f), forwardVector(0,0,1), upVector(0,1,0), sideVector(1,0,0), position(0,0,0), collisionRadius(0), 
-	horizontalRotation(0.0f), verticalRotation(0.0f), velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), texture(0), mesh(0), animated(false), animationIndex(-1), assetIndex(-1), physInit(false)
+GameObject::GameObject(void) : width(100), height(100), position(0,0,1),
+	velocity(0,0,0), acceleration(0,0,0),
+	actorShader(0), assetIndex(-1)
 { }
 
-GameObject::GameObject(char * fileBase, D3DXVECTOR3 pos) : scale(1.0f,1.0f,1.0f), forwardVector(0,0,1), upVector(0,1,0), sideVector(1,0,0), position(0,0,0), collisionRadius(0), 
-	horizontalRotation(0.0f), verticalRotation(0.0f), velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), texture(0), mesh(0), animated(false), animationIndex(-1), assetIndex(-1), physInit(false)
+GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1),
+	velocity(0,0,0), acceleration(0,0,0),
+	actorShader(0), assetIndex(-1)
 {
 	directory = fileBase;
 	position = pos;
@@ -29,9 +24,9 @@ GameObject::GameObject(char * fileBase, D3DXVECTOR3 pos) : scale(1.0f,1.0f,1.0f)
 	ID = currentID++;
 }
 
-GameObject::GameObject(short id, D3DXVECTOR3 pos) : scale(1.0f,1.0f,1.0f), forwardVector(0,0,1), upVector(0,1,0), sideVector(1,0,0), position(0,0,0), collisionRadius(0), 
-	horizontalRotation(0.0f), verticalRotation(0.0f), velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), texture(0), mesh(0), animated(false), animationIndex(-1), assetIndex(-1), physInit(false)
+GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1),
+	velocity(0,0,0), acceleration(0,0,0),
+	actorShader(0), assetIndex(-1)
 {
 	directory = assetManager->getAssetPath(id);
 	position = pos;
@@ -47,20 +42,12 @@ GameObject::~GameObject()
 
 int GameObject::initGeom()
 {
-	if (mesh == 0 && skinnedData.isNull())
-		assetManager->getModel(directory.c_str(), &mesh, &skinnedData);
+	if (quad.texture == NULL || quad.vertexBuffer == NULL)
+		quad.init(directory.c_str());
 	
-	if (skinnedData.isNull()) animated = true;
-	else if (mesh) animated = false;
-
-	//if (!mesh) skinnedData.SetAnimationSet(2);
-
 	string s = directory;
 	s.pop_back();
 	s += "png";
-
-	if (texture == 0)
-		assetManager->getTexture(s.c_str(), &texture);
 	
 	if (actorShader == 0)
 		assetManager->getEffect("Actor.hlsl", &actorShader);
@@ -71,9 +58,6 @@ int GameObject::initGeom()
 		hMatrix = actorShader->GetParameterByName(NULL, "worldViewProj");
 		hTexture = actorShader->GetParameterByName(NULL, "tex");
 		hTechnique = actorShader->GetTechniqueByName("ActorTechnique");
-		hFinalTransforms = actorShader->GetParameterByName(NULL, "finalTransforms");
-		hAnimated = actorShader->GetParameterByName(NULL, "animated");
-		hSunDir = actorShader->GetParameterByName(NULL, "sunDir");
 
 		actorShader->SetTechnique(hTechnique);
 	}
@@ -81,6 +65,7 @@ int GameObject::initGeom()
 	return 0;
 }
 
+/*
 int GameObject::initBullet()
 {
 	colShape = new btBoxShape(btVector3(scale.x,scale.y,scale.z));
@@ -116,55 +101,34 @@ int GameObject::initBullet()
 
 	return 0;
 }
+*/
 
 int GameObject::update(long time)
 {
+	/*
 	if (!physInit)
 	{
 		initBullet();
 		physInit = true;
 	}
-
+	*/
+	/*
 	//setAcceleration(0, -0.16f, 0);
 
 	//position.y = sin(time*0.01+offset)*10;
 	//velocity += acceleration;
 	//position += velocity;
 
-	/*float y = 0;//ocean->getHeight(position, time);
+	float y = 0;//ocean->getHeight(position, time);
 
 	if (position.y <= y)
 	{
 		position.y = y;
 		setVelocity(0,0,0);
 	}*/
-
-	if (!skinnedData.isNull())
-	{
-		D3DXMATRIX worldMatrix, scaleMatrix, translationMatrix, rotationMatrix;
-
-		D3DXMatrixIdentity(&worldMatrix);
-		D3DXMatrixScaling(&scaleMatrix, scale.x, scale.y, scale.z);
-		D3DXMatrixTranslation(&translationMatrix, position.x, position.y, position.z);
-		D3DXMatrixRotationY(&rotationMatrix, horizontalRotation);
-
-		worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
-
-		skinnedData.FrameMove(1.0f/60.0f, &worldMatrix);
-	}
-
+	/*
 	#pragma region Update Transformation Matrix
-	/*D3DXMATRIX scaleMatrix, translationMatrix, rotationMatrix;
-	
-	D3DXMatrixIdentity(&worldMatrix);
-	D3DXMatrixScaling(&scaleMatrix, scale.x, scale.y, scale.z);
-	D3DXMatrixTranslation(&translationMatrix, position.x, position.y, position.z);
-	D3DXMatrixRotationY(&rotationMatrix, horizontalRotation);
-	
-	worldMatrix *= scaleMatrix;
-	worldMatrix *= rotationMatrix;
-	worldMatrix *= translationMatrix;
-	*/
+
 	body->translate(btVector3(velocity.x, velocity.y, velocity.z));
 
 	btTransform * bulletTransformMatrix = &body->getWorldTransform();
@@ -188,68 +152,49 @@ int GameObject::update(long time)
 	D3DXMATRIX scaleMatrix; D3DXMatrixScaling(&scaleMatrix, scale.x, scale.y, scale.z);
 	worldMatrix = scaleMatrix * matOutput;
 	#pragma endregion
-
+	*/
 	return 0;
 }
 
 int GameObject::renderFrame(long time)
 {
-	if (!physInit)
+	/*if (!physInit)
 	{
 		initBullet();
 		physInit = true;
-	}
-	if ((mesh == 0 && skinnedData.isNull()) || texture == 0 || actorShader == 0) initGeom();
+	}*/
+	
+	if (actorShader == 0)
+		initGeom();
 	else
-	{	
-		worldViewProj = worldMatrix * *viewMatrix * *projMatrix;
-	
-		//d3dDev->SetTransform(D3DTS_WORLD, &worldMatrix);
-	
-		//d3dDev->SetTexture(0, texture);
-
-		//D3DXVECTOR3 normal =  cameraPosition - position;
-	
-		if (actorShader)
-		{
-			unsigned int numPasses = 0;
-	
-			#pragma region Set Shader Data
-
-			if (animated) actorShader->SetMatrixArray(hFinalTransforms, finalTransforms, 35);
-			actorShader->SetMatrix(hWorld, &worldMatrix);
-			actorShader->SetMatrix(hMatrix, &worldViewProj);
-			actorShader->SetBool(hAnimated, animated);
-			actorShader->SetTexture(hTexture, texture);
-			actorShader->SetFloatArray(hSunDir, *sunDir, 3);
-	
-			#pragma endregion
+	{
+		D3DXVECTOR3 left, up, forward;
+		left = D3DXVECTOR3(-1,0,0);
+		up = D3DXVECTOR3(0,1,0);
+		forward = D3DXVECTOR3(0,0,-1);
 		
-			actorShader->Begin(&numPasses, 0);
-		
-			for (int i = 0; i < numPasses; i++) 
-			{
-				actorShader->BeginPass(i);
-			
-				if (mesh)
-					mesh->DrawSubset(i);
-				else
-				{
-					skinnedData.Render();
-				}
-			
-				actorShader->EndPass();
-			
-			}
-	
-			actorShader->End();
-		}
-		else
+		D3DXMATRIX trans(	left.x,		left.y,		left.z,		0.0f,
+							up.x,		up.y,		up.z,		0.0f,
+							forward.x,	forward.y,	forward.z,	0.0f,
+							position.x,	position.y,	position.z,	1.0f);
+
+		trans *= *viewMatrix * *projMatrix;
+
+		actorShader->SetMatrix(hMatrix, &trans);
+		actorShader->SetTexture(hTexture, quad.texture);
+
+		unsigned int numPasses = 0;
+
+		actorShader->Begin(&numPasses, 0);
+		for (int i = 0; i < numPasses; i++)
 		{
-			if (mesh) mesh->DrawSubset(0);
-			if (!skinnedData.isNull()) skinnedData.Render();
+			actorShader->BeginPass(i);
+			quad.render(time);
+			actorShader->EndPass();
 		}
+		actorShader->End();
 	}
+
 	return 0;
 }
 
@@ -262,52 +207,12 @@ void GameObject::modVelocity(float x, float y, float z) { modVelocity(D3DXVECTOR
 void GameObject::setPosition(D3DXVECTOR3 pos) { position = pos; }
 void GameObject::setPosition(float x, float y, float z) { position = D3DXVECTOR3(x, y, z); }
 void GameObject::setPositionY(float y) { position.y = y; }
-void GameObject::setScale(D3DXVECTOR3 Scale) { scale = Scale; }
-void GameObject::setScale(float x, float y, float z) { scale = D3DXVECTOR3(x,y,z); }
+void GameObject::setSize(int x, int y) { width = x; height = y; quad.setSize(width, height);}
 void GameObject::setVelocity(D3DXVECTOR3 vel) { velocity = vel; }
 void GameObject::setVelocity(float x, float y, float z) { velocity = D3DXVECTOR3(x,y,z); }
 void GameObject::setAcceleration(D3DXVECTOR3 accel) { acceleration = accel; }
 void GameObject::setAcceleration(float x, float y, float z) { acceleration = D3DXVECTOR3(x,y,z); }
-void GameObject::setRotation(D3DXVECTOR2 target) { horizontalRotation = target.x; verticalRotation = target.y; }
-void GameObject::setRotation(float x, float y) { horizontalRotation = x; verticalRotation = y; }
-void GameObject::setRotation(float x) { horizontalRotation = x; }
-void GameObject::setAnimationIndex(short x) { animationIndex = x; }
 void GameObject::setID(short x) { ID = x; }
-#pragma endregion
-
-#pragma region Move Functions
-void GameObject::moveForward()
-{
-	D3DXVECTOR3 temp = D3DXVECTOR3(
-		sin(horizontalRotation),
-		0,
-		cos(horizontalRotation));
-	velocity -= temp*0.25;
-}
-void GameObject::moveBackward()
-{
-	D3DXVECTOR3 temp = D3DXVECTOR3(
-		sin(horizontalRotation),
-		0,
-		cos(horizontalRotation));
-	velocity += temp*0.25;
-}
-void GameObject::moveLeft()
-{
-	D3DXVECTOR3 temp = D3DXVECTOR3(
-		sin(horizontalRotation + 1.5707963267948966192313216916398),
-		0,
-		cos(horizontalRotation + 1.5707963267948966192313216916398));
-	velocity += temp*0.25;
-}
-void GameObject::moveRight()
-{
-	D3DXVECTOR3 temp = D3DXVECTOR3(
-		sin(horizontalRotation + 1.5707963267948966192313216916398),
-		0,
-		cos(horizontalRotation + 1.5707963267948966192313216916398));
-	velocity -= temp*0.25;
-}
 #pragma endregion
 
 #pragma region Set Statics
@@ -330,12 +235,6 @@ int GameObject::setAssetManager(AssetManager *ass)
 	return 0;
 }
 
-void GameObject::setBullet(btAlignedObjectArray<btCollisionShape*> * col, btDiscreteDynamicsWorld * world)
-{
-	collisionShapes = col;
-	dynamicsWorld = world;
-}
-
 void GameObject::setViewMatrix(D3DXMATRIX * matrix) { viewMatrix = matrix; }
 void GameObject::setProjMatrix(D3DXMATRIX * matrix) { projMatrix = matrix; }
 void GameObject::setMatrices(D3DXMATRIX * view, D3DXMATRIX * proj)
@@ -344,5 +243,4 @@ void GameObject::setMatrices(D3DXMATRIX * view, D3DXMATRIX * proj)
 	setProjMatrix(proj);
 }
 void GameObject::setCameraPosition(D3DXVECTOR3 camPos) { cameraPosition = camPos; }
-void GameObject::setSunDir(D3DXVECTOR3 * x) { sunDir = x; }
 #pragma endregion

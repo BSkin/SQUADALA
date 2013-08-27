@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameObject.h"
 #include "Quad.h"
 #include "Camera.h"
 
@@ -13,7 +14,7 @@
 #define MID_RIGHT	7
 #define MID			8
 
-class MenuWindow
+class MenuWindow : public GameObject
 {
 public:
 	MenuWindow();
@@ -22,8 +23,8 @@ public:
 
 	int init(const char *dir);
 
-	void setSize(float, float);	//size in percentage of screen
-	void setSize(int, int);		//size in pixels
+	virtual void setSize(float, float);	//size in percentage of screen
+	virtual void setSize(int, int);		//size in pixels
 	void setPosition(float, float); //in percentages
 	void setPosition(int x, int y, int anchor);
 	void modPosition(float, float);	
@@ -32,13 +33,10 @@ public:
 	int renderFrame();
 	static void setStatics(Camera *, int, int);
 private:
-	Quad quad;
 	static int wndWidth, wndHeight;
 	static Camera * camera;
-	int width, height;
-
-	D3DXVECTOR3 cameraOffset;
+	
 	int screenX, screenY;
 
-	void updateOffset();
+	void updatePosition();
 };

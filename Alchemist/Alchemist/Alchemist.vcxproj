@@ -149,6 +149,7 @@
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Character.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="RawInputManager.h" />
+    <ClInclude Include="RigidObject.h" />
     <ClInclude Include="SkinnedData.h" />
     <ClInclude Include="stdh.h" />
     <ClInclude Include="Texture.h" />
@@ -175,6 +177,7 @@
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Character.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="DInputManager.cpp" />
@@ -186,6 +189,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="RawInputManager.cpp" />
+    <ClCompile Include="RigidObject.cpp" />
     <ClCompile Include="SkinnedData.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>

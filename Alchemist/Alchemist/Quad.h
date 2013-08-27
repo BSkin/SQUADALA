@@ -34,10 +34,10 @@ public:
 	void setPos(float X, float Y, float Z);
 	void setPos(D3DXVECTOR3 Pos);
 	int render(long time);
-	int render(D3DXVECTOR3 forward, D3DXVECTOR3 up);
 	int update(long time);
 private:
 
+	friend class GameObject;
 	string directory;
 
 	static IDirect3DDevice9* d3dDev;
@@ -47,12 +47,7 @@ private:
 	static D3DXMATRIX *projMatrix;
 
 	IDirect3DVertexBuffer9* vertexBuffer;
-	ID3DXEffect * quadShader;
 	IDirect3DTexture9 * texture;
-
-	D3DXHANDLE hMatrix;
-	D3DXHANDLE hTexture;
-	D3DXHANDLE hTechnique;
 
 	D3DXVECTOR3 position;
 	D3DXVECTOR3 lookAt;
