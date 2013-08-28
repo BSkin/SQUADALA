@@ -463,7 +463,8 @@ int Game::startGame(void)
 int Game::update(long time)
 {
 	inputManager->update();
-	
+	//camera.modPosition(1,0,0);
+
 	#pragma region Start Menu
 	if (gameState == START_MENU)
 	{
@@ -857,7 +858,7 @@ void Game::changeState(int targetState)
 
 		player = new Player("Assets\\Face.png");
 		player->setPosition(0,0,1);
-		player->setSize(10,50);
+		player->setSize(25,50);
 		//player->setScale(1,1,1);
 		gameObjects.push_front(player);
 

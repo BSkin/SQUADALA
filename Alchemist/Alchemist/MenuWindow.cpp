@@ -134,9 +134,9 @@ int MenuWindow::renderFrame()
 void MenuWindow::updatePosition()
 {
 	position = D3DXVECTOR3(
-		-(wndWidth/2) + screenX,
-		-(wndHeight/2) + screenY,
-		1);
+		-(wndWidth/2) + camera->getPosition().x + screenX,
+		-(wndHeight/2) + camera->getPosition().y + screenY,
+		-1);
 }
 
 void MenuWindow::setStatics(Camera * cam, int x, int y)

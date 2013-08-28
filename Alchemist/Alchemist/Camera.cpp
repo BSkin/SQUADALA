@@ -26,7 +26,7 @@ void Camera::getViewMatrix(D3DXMATRIX * viewMatrix)
 		D3DXVECTOR3 zero = D3DXVECTOR3(0,0,0);
 		D3DXVECTOR3 u = D3DXVECTOR3(0,1,0);
 		D3DXVECTOR3 f = D3DXVECTOR3(0,0,1);
-		D3DXMatrixLookAtLH(viewMatrix, &zero, &f, &u);
+		D3DXMatrixLookAtLH(viewMatrix, &position, &lookAt, &u);
 	}
 	else
 	{
@@ -108,20 +108,19 @@ D3DXVECTOR3 Camera::getUpVector()
 }
 void Camera::modPosition(D3DXVECTOR3 vector) 
 { 
-	if (cameraType == FIRST_PERSON)
-		position += vector; 
-	else if (cameraType == THIRD_PERSON)
+	if (cameraType == THIRD_PERSON)
 		lookAt += vector;
+	else position += vector;
+	updateCamera();
 }
 void Camera::modPosition(float x, float y, float z) { modPosition(D3DXVECTOR3(x,y,z)); }
 void Camera::setPosition(D3DXVECTOR3 target) 
 { 
-	if (cameraType == FIRST_PERSON)
-		position = target;
-	else if (cameraType == THIRD_PERSON)
+	if (cameraType == THIRD_PERSON)
 		lookAt = target; 
-	else if (cameraType == CAMERA_2D)
-		position = D3DXVECTOR3(0,0,-10);
+	else position = target;
+	//else if (cameraType == CAMERA_2D)
+	//	position = D3DXVECTOR3(0,0,-10);
 }
 void Camera::setPosition(float x, float y, float z) { setPosition(D3DXVECTOR3(x,y,z)); }
 
@@ -207,8 +206,8 @@ void Camera::updateCamera()
 	{
 		verticalRotation = 0;
 		horizontalRotation = 0;
-		position = D3DXVECTOR3(0,0,-10);
-		lookAt = D3DXVECTOR3(0,0,0);
+		//position = D3DXVECTOR3(0,0,-10);
+		lookAt = position + D3DXVECTOR3(0,0,100);
 	}
 	
 	lookAtVector = lookAt - position;

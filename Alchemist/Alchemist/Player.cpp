@@ -72,19 +72,35 @@ int Player::initGeom()
 
 int Player::update(long time)
 {
-	direction = D3DXVECTOR3(0,0,0);
+	//if (inputManager->getKey('W') > 0) moveUp();
+	//if (inputManager->getKey('S') > 0) moveDown();
+	acceleration = D3DXVECTOR3(0,-0.167, 0);
+
+	velocity += acceleration;
+	direction = D3DXVECTOR3(0,0,0);	
 
 	if (inputManager->getKey('W') > 0) moveUp();
 	if (inputManager->getKey('S') > 0) moveDown();
 	if (inputManager->getKey('D') > 0) moveRight();
 	if (inputManager->getKey('A') > 0) moveLeft();
-			
-	float finalSpeed = speed;
-	if (abs(direction.x) + abs(direction.y) > 1)
+
+	position.x += speed * direction.x;
+
+	if (position.y <= 0)
 	{
-		finalSpeed *= 0.70710678;
+		velocity = D3DXVECTOR3(0,0,0);
+		position.y = 0;
+
+		direction.y = 1;
+		float jumpSpeed = speed;
+		if (direction.x) jumpSpeed *= 0.70710678f;
+		direction.y++;
+		D3DXVECTOR3 jumpDirection = jumpSpeed*direction;
+		//jumpDirection.y += finalSpeed;
+
+		if (inputManager->getKey(VK_SPACE) > 0) velocity += jumpDirection;
 	}
-	position += finalSpeed * direction;
+	position += velocity;
 
 
 	//body->activate(true);
