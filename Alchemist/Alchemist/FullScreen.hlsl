@@ -159,15 +159,10 @@ struct PixelData ShaderVS(VertexData input)
 float4 ShaderPS(PixelData input) : SV_TARGET
 {
 	float4 col = tex2D(TexS, input.tex0);
-	/*col.a = 1;
+	
 	float x = (col.r + col.b + col.g) / 3;
-	float grey = float4(x,x,x,1);
+	col = float4(x,x,x,1);
 
-	float p = max(0, sin(time*0.01));
-	col = col*p;
-	col += grey*(1-p);
-	col.a = 1;
-	*/
 	//col = getEdge( input.tex0 );
 
 	//col = blur(input.tex0);

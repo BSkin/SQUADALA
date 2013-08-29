@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3dx9.h>
+#include "Camera.h"
 #include "AssetManager.h"
 #include "Quad.h"
 #include "btBulletDynamicsCommon.h"
@@ -20,13 +21,13 @@ public:
 	GameObject(short ID, D3DXVECTOR3 pos = D3DXVECTOR3(0,0,0));
 	~GameObject(void);
 
-	static int setd3dDev(IDirect3DDevice9 *d3d_Dev);
-	static int setAssetManager(AssetManager *assetManager);
+	static int setd3dDev(IDirect3DDevice9 *);
+	static int setAssetManager(AssetManager *);
+	static int setCamera(Camera *);
 
 	static void setViewMatrix(D3DXMATRIX*);
 	static void setProjMatrix(D3DXMATRIX*);
 	static void setMatrices(D3DXMATRIX*, D3DXMATRIX*);
-	static void setCameraPosition(D3DXVECTOR3);
 
 	D3DXVECTOR3 getPosition();
 
@@ -62,14 +63,17 @@ protected:
 
 	static LPDIRECT3DDEVICE9 d3dDev;
 	static AssetManager *assetManager;
+	static Camera * camera;
 
 	static D3DXMATRIX *viewMatrix;
 	static D3DXMATRIX *projMatrix;
-	static D3DXVECTOR3 cameraPosition;
 
-	D3DXVECTOR3 position;
+	D3DXVECTOR3 position, renderPosition;
 	D3DXVECTOR3 velocity, acceleration;
 	int width, height;
+
+	short numSpriteRows, numSpriteCols, curSpriteRow, curSpriteCol;
+	bool flipSprite;
 
 	short ID;
 	static short currentID;
@@ -78,6 +82,11 @@ protected:
 	D3DXHANDLE hWorld;
 	D3DXHANDLE hMatrix;		//worldViewProj
 	D3DXHANDLE hTexture;	//texture tex
+	D3DXHANDLE hNumSpriteRows;
+	D3DXHANDLE hNumSpriteCols;
+	D3DXHANDLE hCurSpriteRow;
+	D3DXHANDLE hCurSpriteCol;
+	D3DXHANDLE hFlipSprite;
 	D3DXHANDLE hTechnique;
 	#pragma endregion
 

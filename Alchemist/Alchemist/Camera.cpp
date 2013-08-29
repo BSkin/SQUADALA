@@ -23,10 +23,10 @@ void Camera::getViewMatrix(D3DXMATRIX * viewMatrix)
 {
 	if (orthogonalView || cameraType == CAMERA_2D)
 	{
+		D3DXVECTOR3 pos = D3DXVECTOR3(0,0,-100);
 		D3DXVECTOR3 zero = D3DXVECTOR3(0,0,0);
 		D3DXVECTOR3 u = D3DXVECTOR3(0,1,0);
-		D3DXVECTOR3 f = D3DXVECTOR3(0,0,1);
-		D3DXMatrixLookAtLH(viewMatrix, &position, &lookAt, &u);
+		D3DXMatrixLookAtLH(viewMatrix, &pos, &zero, &u);
 	}
 	else
 	{

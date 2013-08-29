@@ -331,6 +331,7 @@ int Game::init(void)
 	Quad::setAssetManager(assetManager);
 	GameObject::setd3dDev(d3dDev);
 	GameObject::setAssetManager(assetManager);
+	GameObject::setCamera(&camera);
 	//GameObject::setOcean(ocean);
 	RigidObject::setBullet(&collisionShapes, dynamicsWorld);
 	Player::setInputManager(inputManager);
@@ -531,7 +532,9 @@ int Game::update(long time)
 		}		
 
 		//player->setPosition(0, 10, 0);
-		//camera.setPosition(player->getPosition());		
+		//camera.setPosition(player->getPosition());	
+
+		camera.setPosition(player->getPosition());
 
 		//dynamicsWorld->stepSimulation(1.f/60.f,10);
 	}
@@ -549,7 +552,6 @@ int Game::renderFrame(long time)
 	camera.getProjMatrix(&projMatrix);
 
 	GameObject::setMatrices(&viewMatrix, &projMatrix);
-	GameObject::setCameraPosition(camera.getPosition());
 	
 	Quad::setMatrices(&viewMatrix, &projMatrix);
 
@@ -856,11 +858,22 @@ void Game::changeState(int targetState)
 		float rotation;
 		float maxDist = 10.0f;
 
-		player = new Player("Assets\\Face.png");
+		player = new Player("Assets\\spritetest.png");
 		player->setPosition(0,0,1);
-		player->setSize(25,50);
+		player->setSize(50,50);
 		//player->setScale(1,1,1);
 		gameObjects.push_front(player);
+
+		for (int i = 0; i < 50; i++)
+		{
+			GameObject * square = new GameObject("Assets\\grass.jpg");
+			float x = rand() % 100;
+			float y = rand() % 100;
+
+			square->setSize(300,300);
+			square->setPosition(x*10, y*10, 0);
+			gameObjects.push_front(square);
+		}
 
 		/*
 		for (int i = 0; i < 100; i++)

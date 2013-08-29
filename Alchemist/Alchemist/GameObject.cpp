@@ -3,19 +3,21 @@
 
 LPDIRECT3DDEVICE9	GameObject::d3dDev =			NULL;
 AssetManager *		GameObject::assetManager =		NULL;
+Camera *			GameObject::camera =			NULL;
 D3DXMATRIX *		GameObject::viewMatrix =		NULL;
 D3DXMATRIX *		GameObject::projMatrix =		NULL;
-D3DXVECTOR3			GameObject::cameraPosition =	D3DXVECTOR3(0,0,0);
 short				GameObject::currentID =			0;
 
-GameObject::GameObject(void) : width(100), height(100), position(0,0,1),
+GameObject::GameObject(void) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
 	velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), assetIndex(-1)
+	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE),
+	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 { }
 
-GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1),
+GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
 	velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), assetIndex(-1)
+	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE),
+	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 {
 	directory = fileBase;
 	position = pos;
@@ -24,9 +26,10 @@ GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), hei
 	ID = currentID++;
 }
 
-GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1),
+GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
 	velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), assetIndex(-1)
+	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE),
+	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 {
 	directory = assetManager->getAssetPath(id);
 	position = pos;
@@ -57,6 +60,11 @@ int GameObject::initGeom()
 		hWorld = actorShader->GetParameterByName(NULL, "worldMatrix");
 		hMatrix = actorShader->GetParameterByName(NULL, "worldViewProj");
 		hTexture = actorShader->GetParameterByName(NULL, "tex");
+		hNumSpriteRows = actorShader->GetParameterByName(NULL, "numSpriteRows");
+		hNumSpriteCols = actorShader->GetParameterByName(NULL, "numSpriteCols");
+		hCurSpriteRow = actorShader->GetParameterByName(NULL, "curSpriteRow");
+		hCurSpriteCol = actorShader->GetParameterByName(NULL, "curSpriteCol");
+		hFlipSprite = actorShader->GetParameterByName(NULL, "flipSprite");
 		hTechnique = actorShader->GetTechniqueByName("ActorTechnique");
 
 		actorShader->SetTechnique(hTechnique);
@@ -172,16 +180,24 @@ int GameObject::renderFrame(long time)
 		left = D3DXVECTOR3(-1,0,0);
 		up = D3DXVECTOR3(0,1,0);
 		forward = D3DXVECTOR3(0,0,-1);
+
+		renderPosition = position - D3DXVECTOR3(camera->getPosition().x, camera->getPosition().y, 0);
 		
-		D3DXMATRIX trans(	left.x,		left.y,		left.z,		0.0f,
-							up.x,		up.y,		up.z,		0.0f,
-							forward.x,	forward.y,	forward.z,	0.0f,
-							position.x,	position.y,	position.z,	1.0f);
+		D3DXMATRIX trans(	left.x,				left.y,				left.z,				0.0f,
+							up.x,				up.y,				up.z,				0.0f,
+							forward.x,			forward.y,			forward.z,			0.0f,
+							renderPosition.x,	renderPosition.y,	renderPosition.z,	1.0f);
 
 		trans *= *viewMatrix * *projMatrix;
 
 		actorShader->SetMatrix(hMatrix, &trans);
 		actorShader->SetTexture(hTexture, quad.texture);
+
+		actorShader->SetFloat(hNumSpriteCols, numSpriteCols);
+		actorShader->SetFloat(hNumSpriteRows, numSpriteRows);
+		actorShader->SetFloat(hCurSpriteCol, curSpriteCol);
+		actorShader->SetFloat(hCurSpriteRow, curSpriteRow);
+		actorShader->SetBool(hFlipSprite, flipSprite);
 
 		unsigned int numPasses = 0;
 
@@ -235,6 +251,12 @@ int GameObject::setAssetManager(AssetManager *ass)
 	return 0;
 }
 
+int GameObject::setCamera(Camera * cam)
+{
+	camera = cam;
+	return 0;
+}
+
 void GameObject::setViewMatrix(D3DXMATRIX * matrix) { viewMatrix = matrix; }
 void GameObject::setProjMatrix(D3DXMATRIX * matrix) { projMatrix = matrix; }
 void GameObject::setMatrices(D3DXMATRIX * view, D3DXMATRIX * proj)
@@ -242,5 +264,4 @@ void GameObject::setMatrices(D3DXMATRIX * view, D3DXMATRIX * proj)
 	setViewMatrix(view);
 	setProjMatrix(proj);
 }
-void GameObject::setCameraPosition(D3DXVECTOR3 camPos) { cameraPosition = camPos; }
 #pragma endregion

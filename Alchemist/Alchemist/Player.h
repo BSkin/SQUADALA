@@ -2,7 +2,6 @@
 
 #include "Character.h"
 #include "RawInputManager.h"
-#include "Camera.h"
 
 class Player : public Character
 {

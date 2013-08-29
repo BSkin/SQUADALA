@@ -1,5 +1,10 @@
 extern float4x4 worldViewProj;
 extern texture tex;
+extern float numSpriteRows;
+extern float numSpriteCols;
+extern float curSpriteRow;
+extern float curSpriteCol;
+extern bool flipSprite;
 
 sampler TexS = sampler_state 
 {
@@ -41,7 +46,14 @@ struct PixelData ShaderVS(VertexData vin)
 
 float4 ShaderPS(PixelData vin) : COLOR
 {
-	vin.col = tex2D(TexS, vin.tex0);
+	float u = vin.tex0.x;
+	if (flipSprite) u = -u + 1;
+	float v = vin.tex0.y;
+	u /= numSpriteCols;
+	v /= numSpriteRows;
+	u += curSpriteCol/numSpriteCols;
+	v += curSpriteRow/numSpriteRows;
+	vin.col = tex2D(TexS, float2(u,v));
 	return(vin.col);
 }
 

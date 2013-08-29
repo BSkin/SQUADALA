@@ -65,6 +65,8 @@ int Player::initBullet()
 int Player::initGeom()
 {
 	GameObject::initGeom();
+	numSpriteCols = 7;
+	numSpriteRows = 3;
 	//body->activate(true);
 	//body->translate(btVector3(position.x, position.y, position.z));
 	return 0;
@@ -83,6 +85,22 @@ int Player::update(long time)
 	if (inputManager->getKey('S') > 0) moveDown();
 	if (inputManager->getKey('D') > 0) moveRight();
 	if (inputManager->getKey('A') > 0) moveLeft();
+
+	if (inputManager->getKey('D') == 1 || inputManager->getKey('A') == 1)
+	{
+		flipSprite = direction.x <= 0;
+	}
+	
+	if (position.y > 0)
+	{
+		curSpriteRow = 2;
+		curSpriteCol = 0;
+	}
+	else
+	{
+		if (direction.x) { curSpriteRow = 0; curSpriteCol = (int)time*0.1; }
+		else { curSpriteRow = 1; curSpriteCol = 0; }
+	}
 
 	position.x += speed * direction.x;
 
