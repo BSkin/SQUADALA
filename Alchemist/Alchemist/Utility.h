@@ -4,6 +4,8 @@
 #include <sstream>
 #include <d3d9.h>
 #include <assert.h>
+#include <d3dx9.h>
+#include "btBulletDynamicsCommon.h"
 
 // Template to convert standard types into strings
 template <class T>
@@ -34,4 +36,6 @@ public:
 	static bool DoesFileExist(const std::string &filename);
 	static void SplitPath(const std::string& inputPath, std::string* pathOnly, std::string* filenameOnly);
 	static std::string GetTheCurrentDirectory();
+	static D3DXMATRIX btTransToD3DXMat(btTransform*);
+	static btTransform D3DXMatTobtTrans(D3DXMATRIX*);
 };

@@ -13,16 +13,19 @@ public:
 	virtual int update(long time);
 	virtual int renderFrame(long time);
 
+	void setMass(float x);
 	static void setBullet(btAlignedObjectArray<btCollisionShape*> *, btDiscreteDynamicsWorld *);
 
-private:
+protected:
 	virtual int initGeom();
 	virtual int initBullet();
 
 	static btAlignedObjectArray<btCollisionShape*> * collisionShapes;
 	static btDiscreteDynamicsWorld * dynamicsWorld;
 
-	btBoxShape* colShape;
+	btCollisionShape* colShape;
 	btRigidBody * body;
 	bool physInit;
+
+	btScalar mass;
 };

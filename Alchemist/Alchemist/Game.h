@@ -39,7 +39,17 @@
 #include "stdh.h"
 
 //#include "btBulletCollisionCommon.h"
-#include "btBulletDynamicsCommon.h"
+//#include "btBulletDynamicsCommon.h"
+#include "BulletCollision/CollisionShapes/btBox2dShape.h"
+#include "BulletCollision/CollisionDispatch/btEmptyCollisionAlgorithm.h"
+#include "BulletCollision/CollisionDispatch/btBox2dBox2dCollisionAlgorithm.h"
+#include "BulletCollision/CollisionDispatch/btConvex2dConvex2dAlgorithm.h"
+
+#include "BulletCollision/CollisionShapes/btBox2dShape.h"
+#include "BulletCollision/CollisionShapes/btConvex2dShape.h"
+#include "BulletCollision/NarrowPhaseCollision/btMinkowskiPenetrationDepthSolver.h"
+
+#include "BulletDebugDrawer.h"
 
 #include "Packet.h"
 #include "IndexedList.h"
@@ -150,11 +160,13 @@ private:
 
 	#pragma region Bullet Variables
 	btAlignedObjectArray<btCollisionShape*>	collisionShapes;
-	btDefaultCollisionConfiguration * collisionConfiguration;
-	btCollisionDispatcher * dispatcher;
-	btBroadphaseInterface * overlappingPairCache;
-	btSequentialImpulseConstraintSolver * solver;
+	btBroadphaseInterface*	broadphase;
+	btCollisionDispatcher*	dispatcher;
+	btConstraintSolver*	solver;
+	btDefaultCollisionConfiguration* collisionConfiguration;
 	btDiscreteDynamicsWorld * dynamicsWorld;
+
+	BulletDebugDrawer * debugDrawer;
 	//btIDebugDraw asdf;	<----------------------------TODO: Create an implementation which implements the drawLine method; 
 	//														setDebugDrawer(asdf); dynamicsWorld->getDebugDrawer->setDebugMode(); dynamicsWorld->debugDrawWorld(); 
 	#pragma endregion

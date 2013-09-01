@@ -9,7 +9,7 @@ Player::Player(void) : Character()
 
 Player::Player(char *fileBase) : Character(fileBase)
 {
-	position = D3DXVECTOR3(0,0,0);
+	
 }
 
 Player::Player(short ID) : Character(ID)
@@ -76,9 +76,9 @@ int Player::update(long time)
 {
 	//if (inputManager->getKey('W') > 0) moveUp();
 	//if (inputManager->getKey('S') > 0) moveDown();
-	acceleration = D3DXVECTOR3(0,-0.167, 0);
+	//acceleration = D3DXVECTOR3(0,-0.167, 0);
 
-	velocity += acceleration;
+	//velocity += acceleration;
 	direction = D3DXVECTOR3(0,0,0);	
 
 	if (inputManager->getKey('W') > 0) moveUp();
@@ -86,44 +86,37 @@ int Player::update(long time)
 	if (inputManager->getKey('D') > 0) moveRight();
 	if (inputManager->getKey('A') > 0) moveLeft();
 
-	if (inputManager->getKey('D') == 1 || inputManager->getKey('A') == 1)
-	{
-		flipSprite = direction.x <= 0;
-	}
+	if (direction.x < 0) flipSprite = true;
+	else if (direction.x > 0) flipSprite = false;
 	
-	if (position.y > 0)
-	{
-		curSpriteRow = 2;
-		curSpriteCol = 0;
-	}
-	else
-	{
-		if (direction.x) { curSpriteRow = 0; curSpriteCol = (int)time*0.1; }
+	//if (position.y > height/2)
+	//{
+	//	curSpriteRow = 2;
+	//	curSpriteCol = 0;
+	//}
+	//else
+	//{
+		if (direction.x) { curSpriteRow = 0; curSpriteCol = (int)time*0.125; }
 		else { curSpriteRow = 1; curSpriteCol = 0; }
-	}
+	//}
 
-	position.x += speed * direction.x;
+	//position = D3DXVECTOR3(body->getCenterOfMassPosition().x(), body->getCenterOfMassPosition().y(), body->getCenterOfMassPosition().z());
 
-	if (position.y <= 0)
-	{
-		velocity = D3DXVECTOR3(0,0,0);
-		position.y = 0;
+	velocity.x = speed*0.01 * direction.x;
+	//if (inputManager->getKey(VK_SPACE) == 1) body->setLinearVelocity(body->getLinearVelocity() + btVector3(0,5,0));
+	//if (inputManager->getKey(VK_SPACE) == 1) body->setLinearVelocity(btVector3(body->getLinearVelocity().x(), 5, 0));
+	if (inputManager->getKey(VK_SPACE) == 1) body->setLinearVelocity(btVector3(0, 5, 0));
 
-		direction.y = 1;
-		float jumpSpeed = speed;
-		if (direction.x) jumpSpeed *= 0.70710678f;
-		direction.y++;
-		D3DXVECTOR3 jumpDirection = jumpSpeed*direction;
-		//jumpDirection.y += finalSpeed;
-
-		if (inputManager->getKey(VK_SPACE) > 0) velocity += jumpDirection;
-	}
-	position += velocity;
-
+	
+	//position += velocity;
+	
 
 	//body->activate(true);
-	//body->translate(btVector3(velocity.x, velocity.y, velocity.z));
-	
+	body->translate(btVector3(velocity.x, velocity.y, velocity.z));
+	body->setAngularFactor(0);
+	body->activate(true);
+	//body->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+
 	/*
 	#pragma region Calculate World Matrix
 	D3DXMATRIX scaleMatrix, translationMatrix, rotationMatrix;
@@ -162,14 +155,7 @@ int Player::update(long time)
 
 int Player::renderFrame(long time)
 {
-	/*if (!physInit)
-	{
-		initBullet();
-		physInit = true;
-	}*/
-	quad.setPos(position);
-	GameObject::renderFrame(time);
-	return 0;
+	return Character::renderFrame(time);
 }
 
 int Player::setInputManager(RawInputManager * iManager)

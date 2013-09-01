@@ -23,20 +23,21 @@ public:
 
 	int init(const char *dir);
 
-	virtual void setSize(float, float);	//size in percentage of screen
-	virtual void setSize(int, int);		//size in pixels
-	void setPosition(float, float); //in percentages
+	virtual void setSizePercentage(float, float);	//size in percentage of screen
+	void setPosition(float, float);
+	virtual void setPositionPercent(float, float);
+	virtual void setSize(int, int);
 	void setPosition(int x, int y, int anchor);
 	void modPosition(float, float);	
 	void modPosition(int x, int y);
 
-	int renderFrame();
+	virtual int renderFrame(long time);
 	static void setStatics(Camera *, int, int);
 private:
-	static int wndWidth, wndHeight;
+	static float wndWidth, wndHeight;
 	static Camera * camera;
 	
-	int screenX, screenY;
+	float screenX, screenY;
 
 	void updatePosition();
 };

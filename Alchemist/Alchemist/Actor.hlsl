@@ -62,6 +62,6 @@ technique ActorTechnique
 	pass first {
 		vertexshader = compile vs_3_0 ShaderVS();
 		pixelshader = compile ps_3_0 ShaderPS();
-
+		//FillMode = WireFrame;
 	}
 }

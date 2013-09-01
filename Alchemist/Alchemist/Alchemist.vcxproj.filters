@@ -129,9 +129,6 @@
     <ClInclude Include="SkinnedData.h">
       <Filter>Header Files\Engine Components\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="MenuWindow.h">
-      <Filter>Header Files\Engine Components</Filter>
-    </ClInclude>
     <ClInclude Include="AssetLoader.h">
       <Filter>Header Files\Engine Components\Asset Manager</Filter>
     </ClInclude>
@@ -151,6 +148,12 @@
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClInclude>
     <ClInclude Include="Character.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="BulletDebugDrawer.h">
+      <Filter>Header Files\Engine Components\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuWindow.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClInclude>
   </ItemGroup>
@@ -191,9 +194,6 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files\Engine Components\Asset Manager</Filter>
     </ClCompile>
-    <ClCompile Include="MenuWindow.cpp">
-      <Filter>Source Files\Engine Components</Filter>
-    </ClCompile>
     <ClCompile Include="AssetLoader.cpp">
       <Filter>Source Files\Engine Components\Asset Manager</Filter>
     </ClCompile>
@@ -210,6 +210,12 @@
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClCompile>
     <ClCompile Include="Character.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletDebugDrawer.cpp">
+      <Filter>Source Files\Engine Components\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuWindow.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClCompile>
   </ItemGroup>

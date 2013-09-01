@@ -1,16 +1,16 @@
 #include "Character.h"
 
-Character::Character(void) : GameObject(), speed(5), direction(0,0,0)
+Character::Character(void) : RigidObject(), speed(5), direction(0,0,0)
 {
 	
 }
 
-Character::Character(char *fileBase) : GameObject(fileBase), speed(5), direction(0,0,0)
+Character::Character(char *fileBase) : RigidObject(fileBase), speed(5), direction(0,0,0)
 {
 	position = D3DXVECTOR3(0,0,0);
 }
 
-Character::Character(short ID) : GameObject(ID), speed(5), direction(0,0,0)
+Character::Character(short ID) : RigidObject(ID), speed(5), direction(0,0,0)
 {
 	
 }
@@ -22,18 +22,14 @@ Character::~Character(void)
 
 int Character::update(long time)
 {
-	float finalSpeed = speed;
-	if (abs(direction.x) + abs(direction.y) > 1)
-	{
-		speed *= 0.70710678;
-	}
-	position += speed * direction;
+
 	return 0;
 }
 
 int Character::renderFrame(long time)
 {
-
+	quad.setPos(position);
+	RigidObject::renderFrame(time);
 	return 0;
 }
 

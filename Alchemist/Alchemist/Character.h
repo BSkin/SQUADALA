@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GameObject.h"
+#include "RigidObject.h"
 
-class Character : public GameObject
+class Character : public RigidObject
 {
 public:
 	Character(void);

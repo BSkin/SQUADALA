@@ -1,15 +1,15 @@
 #include "camera.h"
 #include <cmath>
 
-Camera::Camera(void) : position(0.0,0.0,-100.0), lookAt(0.0,0.0,0.0), 
-	orthogonalView(false), 
+Camera::Camera(void) : position(0.0,0.0,-1000.0), lookAt(0.0,0.0,0.0), 
+	orthogonalView(true), 
 	cameraType(CAMERA_2D), 
 	speed(1.0f), 
 	worldMatrix(0),
 	PI(atan(1)*4), verticalRotation(0.0f), horizontalRotation(0.0f), 
 	nearPlane(1.0f), farPlane(1000.0f),
 	cameraDistance(25.0f),
-	wndWidth(2000), wndHeight(2000)
+	wndWidth(1280), wndHeight(720)
 {
 
 }
@@ -23,7 +23,7 @@ void Camera::getViewMatrix(D3DXMATRIX * viewMatrix)
 {
 	if (orthogonalView || cameraType == CAMERA_2D)
 	{
-		D3DXVECTOR3 pos = D3DXVECTOR3(0,0,-100);
+		D3DXVECTOR3 pos = D3DXVECTOR3(0,0,-500);
 		D3DXVECTOR3 zero = D3DXVECTOR3(0,0,0);
 		D3DXVECTOR3 u = D3DXVECTOR3(0,1,0);
 		D3DXMatrixLookAtLH(viewMatrix, &pos, &zero, &u);
@@ -118,7 +118,7 @@ void Camera::setPosition(D3DXVECTOR3 target)
 { 
 	if (cameraType == THIRD_PERSON)
 		lookAt = target; 
-	else position = target;
+	else position = target*0.01;
 	//else if (cameraType == CAMERA_2D)
 	//	position = D3DXVECTOR3(0,0,-10);
 }

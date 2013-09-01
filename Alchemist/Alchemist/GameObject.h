@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3dx9.h>
+#include "Utility.h"
 #include "Camera.h"
 #include "AssetManager.h"
 #include "Quad.h"
@@ -35,17 +36,20 @@ public:
 	void modVelocity(D3DXVECTOR3);
 
 	void setPosition(D3DXVECTOR3);
-	void setPosition(float x, float y, float z);
+	virtual void setPosition(float x, float y, float z);
 	void setPositionY(float y);
 	virtual void setSize(int x, int y);
 	void setVelocity(D3DXVECTOR3);
 	void setVelocity(float x, float y, float z);
 	void setAcceleration(D3DXVECTOR3);
 	void setAcceleration(float x, float y, float z);
+	void setRotation(float x);
+	void modRotation(float x);
 	void setID(short);
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
+	virtual int renderFrame(long time, D3DXMATRIX * trans);
 
 protected:
 	friend class Packet;
@@ -70,10 +74,11 @@ protected:
 
 	D3DXVECTOR3 position, renderPosition;
 	D3DXVECTOR3 velocity, acceleration;
-	int width, height;
+	float width, height;
 
 	short numSpriteRows, numSpriteCols, curSpriteRow, curSpriteCol;
 	bool flipSprite;
+	float rotation;
 
 	short ID;
 	static short currentID;

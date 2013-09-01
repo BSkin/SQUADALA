@@ -1,7 +1,7 @@
 #include "MenuWindow.h"
 
-int MenuWindow::wndWidth = 0;
-int MenuWindow::wndHeight = 0;
+float MenuWindow::wndWidth = 0;
+float MenuWindow::wndHeight = 0;
 Camera * MenuWindow::camera = 0;
 
 MenuWindow::MenuWindow() : GameObject(), screenX(0.0f), screenY(0.0f)
@@ -24,11 +24,10 @@ void MenuWindow::setSize(int x, int y)
 {
 	width = x;
 	height = y;
-
 	quad.setSize(width, height);
 }
 
-void MenuWindow::setSize(float x, float y)
+void MenuWindow::setSizePercentage(float x, float y)
 {
 	if (x > 1.0f) x = 1.0f;
 	if (x < 0.0f) x = 0.0f;
@@ -43,8 +42,8 @@ void MenuWindow::setSize(float x, float y)
 
 void MenuWindow::setPosition(int x, int y, int anchor)
 {
-	int x0 = 0;
-	int y0 = 0;
+	float x0 = 0;
+	float y0 = 0;
 
 	switch (anchor)
 	{
@@ -57,8 +56,8 @@ void MenuWindow::setPosition(int x, int y, int anchor)
 			y0 = wndHeight - height/2;
 			break;
 		case BOT_LEFT :
-			x0 = width/2;
-			y0 = height/2;
+			x0 = width/2.0;
+			y0 = height/2.0;
 			break;
 		case BOT_RIGHT :
 			x0 = wndWidth - width/2;
@@ -90,8 +89,8 @@ void MenuWindow::setPosition(int x, int y, int anchor)
 			break;
 	}
 
-	x0 += x;
-	y0 += y;
+	x0 += x;//*0.01;
+	y0 += y;//*0.01;
 
 	screenX = x0;
 	screenY = y0;
@@ -100,6 +99,15 @@ void MenuWindow::setPosition(int x, int y, int anchor)
 }
 
 void MenuWindow::setPosition(float x, float y)
+{
+	screenX = x;
+	screenY = y;
+
+	updatePosition(); 
+	//quad.setPos(position);
+}
+
+void MenuWindow::setPositionPercent(float x, float y)
 {
 	int ix = x*wndWidth;
 	int iy = y*wndHeight;
@@ -123,19 +131,17 @@ void MenuWindow::modPosition(float x, float y)
 	//quad.setPos(cameraPosition);
 }
 
-int MenuWindow::renderFrame()
+int MenuWindow::renderFrame(long time)
 {
 	updatePosition();
-	GameObject::renderFrame(0.0f);
-		
-	return 0;
+	return GameObject::renderFrame(time);
 }
 
 void MenuWindow::updatePosition()
 {
 	position = D3DXVECTOR3(
-		-(wndWidth/2) + camera->getPosition().x + screenX,
-		-(wndHeight/2) + camera->getPosition().y + screenY,
+		-(wndWidth/2.0) + camera->getPosition().x + screenX,
+		-(wndHeight/2.0) + camera->getPosition().y + screenY,
 		-1);
 }
 

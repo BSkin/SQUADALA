@@ -10,13 +10,13 @@ short				GameObject::currentID =			0;
 
 GameObject::GameObject(void) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
 	velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE),
+	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 { }
 
 GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
 	velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE),
+	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 {
 	directory = fileBase;
@@ -28,7 +28,7 @@ GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), hei
 
 GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
 	velocity(0,0,0), acceleration(0,0,0),
-	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE),
+	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 {
 	directory = assetManager->getAssetPath(id);
@@ -165,13 +165,7 @@ int GameObject::update(long time)
 }
 
 int GameObject::renderFrame(long time)
-{
-	/*if (!physInit)
-	{
-		initBullet();
-		physInit = true;
-	}*/
-	
+{	
 	if (actorShader == 0)
 		initGeom();
 	else
@@ -179,18 +173,61 @@ int GameObject::renderFrame(long time)
 		D3DXVECTOR3 left, up, forward;
 		left = D3DXVECTOR3(-1,0,0);
 		up = D3DXVECTOR3(0,1,0);
-		forward = D3DXVECTOR3(0,0,-1);
+		forward = D3DXVECTOR3(0,0,1);
 
 		renderPosition = position - D3DXVECTOR3(camera->getPosition().x, camera->getPosition().y, 0);
 		
-		D3DXMATRIX trans(	left.x,				left.y,				left.z,				0.0f,
+		D3DXMATRIX orient(	left.x,				left.y,				left.z,				0.0f,
 							up.x,				up.y,				up.z,				0.0f,
 							forward.x,			forward.y,			forward.z,			0.0f,
 							renderPosition.x,	renderPosition.y,	renderPosition.z,	1.0f);
 
-		trans *= *viewMatrix * *projMatrix;
+		D3DXMATRIX scale;
+		D3DXMatrixScaling(&scale, width, height, 1);
+		
+		D3DXMATRIX rot;
+		D3DXMatrixRotationZ(&rot, rotation);
+		
+		D3DXMATRIX trans = scale * rot * orient * *viewMatrix * *projMatrix;
 
 		actorShader->SetMatrix(hMatrix, &trans);
+		actorShader->SetTexture(hTexture, quad.texture);
+
+		actorShader->SetFloat(hNumSpriteCols, numSpriteCols);
+		actorShader->SetFloat(hNumSpriteRows, numSpriteRows);
+		actorShader->SetFloat(hCurSpriteCol, curSpriteCol);
+		actorShader->SetFloat(hCurSpriteRow, curSpriteRow);
+		actorShader->SetBool(hFlipSprite, flipSprite);
+
+		unsigned int numPasses = 0;
+
+		actorShader->Begin(&numPasses, 0);
+		for (int i = 0; i < numPasses; i++)
+		{
+			actorShader->BeginPass(i);
+			quad.render(time);
+			actorShader->EndPass();
+		}
+		actorShader->End();
+	}
+
+	return 0;
+}
+
+int GameObject::renderFrame(long time, D3DXMATRIX * trans)
+{
+	if (actorShader == 0)
+		initGeom();
+	else
+	{
+		D3DXMATRIX camTrans;// - D3DXVECTOR3(camera->getPosition().x, camera->getPosition().y, 0);
+		D3DXMatrixTranslation(&camTrans, -camera->getPosition().x, -camera->getPosition().y,0);
+
+		D3DXMATRIX scale;
+		D3DXMatrixScaling(&scale, width, height, 0);
+		D3DXMATRIX asdf = scale * *trans * camTrans * *viewMatrix * *projMatrix;
+
+		actorShader->SetMatrix(hMatrix, &asdf);
 		actorShader->SetTexture(hTexture, quad.texture);
 
 		actorShader->SetFloat(hNumSpriteCols, numSpriteCols);
@@ -220,14 +257,16 @@ void GameObject::modVelocity(D3DXVECTOR3 x) { velocity += x; }
 void GameObject::modVelocity(float x, float y, float z) { modVelocity(D3DXVECTOR3(x,y,z)); }
 
 #pragma region Set Functions
-void GameObject::setPosition(D3DXVECTOR3 pos) { position = pos; }
-void GameObject::setPosition(float x, float y, float z) { position = D3DXVECTOR3(x, y, z); }
-void GameObject::setPositionY(float y) { position.y = y; }
-void GameObject::setSize(int x, int y) { width = x; height = y; quad.setSize(width, height);}
+void GameObject::setPosition(D3DXVECTOR3 pos) { position = pos*0.01f; }
+void GameObject::setPosition(float x, float y, float z) { position = D3DXVECTOR3(x*0.01f, y*0.01f, z); }
+void GameObject::setPositionY(float y) { position.y = y*0.01f; }
+void GameObject::setSize(int x, int y) { width = x*0.01f; height = y*0.01f; quad.setSize(width, height);}
 void GameObject::setVelocity(D3DXVECTOR3 vel) { velocity = vel; }
 void GameObject::setVelocity(float x, float y, float z) { velocity = D3DXVECTOR3(x,y,z); }
 void GameObject::setAcceleration(D3DXVECTOR3 accel) { acceleration = accel; }
 void GameObject::setAcceleration(float x, float y, float z) { acceleration = D3DXVECTOR3(x,y,z); }
+void GameObject::setRotation(float x) { rotation = x; }
+void GameObject::modRotation(float x) { rotation += x; }
 void GameObject::setID(short x) { ID = x; }
 #pragma endregion
 

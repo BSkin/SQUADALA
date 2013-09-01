@@ -87,7 +87,7 @@ Game::Game(HINSTANCE hInst, char* gameName) : countsPerSecond(0.0), CounterStart
 												renderSurface(NULL), backBuffer(NULL)
 { 
 	fullScreen = false;
-	console = true;
+	console = false;
 	networkState = ONLINE_STATE;
 
 	hInstance = hInst;
@@ -135,7 +135,28 @@ int Game::init(void)
 		wndHeight = desktop.bottom;
 	}
 
-	hwnd = CreateWindowA(winClass, mGameName, WS_OVERLAPPEDWINDOW, 10, 10, this->wndWidth, this->wndHeight, NULL, NULL, hInstance, NULL);
+	/*
+	POINT windowPos;
+	D3DDEVICE_CREATION_PARAMETERS cparams;
+	RECT winRect;
+
+	d3dDev->GetCreationParameters(&cparams);
+	GetWindowRect(cparams.hFocusWindow, &winRect);
+
+	windowPos.x = winRect.right/2 - wndWidth/2;
+	windowPos.y = winRect.bottom/2 - wndHeight/2;
+	*/
+
+	hwnd = CreateWindowEx(NULL,
+		winClass, 
+		mGameName, 
+		WS_POPUP|WS_VISIBLE,//WS_OVERLAPPEDWINDOW | WS_VISIBLE,//WS_POPUP, 
+		0, 0, 
+		wndWidth, wndHeight, 
+		NULL, 
+		NULL, 
+		hInstance, 
+		NULL);
 		
     if (hwnd == NULL) {
 	   ec = GetLastError();
@@ -192,7 +213,7 @@ int Game::init(void)
 	//md3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
 	//md3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
-	md3dpp->BackBufferFormat = D3DFMT_R5G6B5;
+	md3dpp->BackBufferFormat = D3DFMT_X8R8G8B8;//D3DFMT_R5G6B5;
 	md3dpp->EnableAutoDepthStencil = TRUE;
 	md3dpp->AutoDepthStencilFormat = D3DFMT_D16;
 
@@ -219,7 +240,7 @@ int Game::init(void)
     //d3dDev->SetRenderState( D3DRS_FOGEND,   *((DWORD*)&(fConv = 100.0f)) );
     //d3dDev->SetRenderState( D3DRS_FOGTABLEMODE, D3DFOG_LINEAR );
     //d3dDev->SetRenderState( D3DRS_FOGENABLE,    TRUE );
-    d3dDev->SetRenderState( D3DRS_DITHERENABLE, TRUE );
+    //d3dDev->SetRenderState( D3DRS_DITHERENABLE, TRUE );
 
 	//Alpha Blending
 	d3dDev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
@@ -303,21 +324,40 @@ int Game::init(void)
 	#pragma endregion
 
 	#pragma region Initialize Bullet Physics
-	/// collision configuration contains default setup for memory , collision setup . Advanced users can create their own configuration .
-	collisionConfiguration = new btDefaultCollisionConfiguration ();
+	///collision configuration contains default setup for memory, collision setup
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	//m_collisionConfiguration->setConvexConvexMultipointIterations();
 
-	///use the default collision dispatcher . For parallel processing you can use a diffent dispatcher ( see Extras / BulletMultiThreaded )
-	dispatcher = new btCollisionDispatcher ( collisionConfiguration );
+	///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
+	dispatcher = new	btCollisionDispatcher(collisionConfiguration);
 
-	/// btDbvtBroadphase is a good general purpose broadphase . You can also try out btAxis3Sweep .
-	overlappingPairCache = new btDbvtBroadphase ();
+	btVoronoiSimplexSolver* simplex = new btVoronoiSimplexSolver();
+	btMinkowskiPenetrationDepthSolver* pdSolver = new btMinkowskiPenetrationDepthSolver();
+
+
+	btConvex2dConvex2dAlgorithm::CreateFunc* convexAlgo2d = new btConvex2dConvex2dAlgorithm::CreateFunc(simplex,pdSolver);
 	
-	///the default constraint solver . For parallel processing you can use a different solver ( see Extras / BulletMultiThreaded )
-	solver = new btSequentialImpulseConstraintSolver;
+	dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,CONVEX_2D_SHAPE_PROXYTYPE,convexAlgo2d);
+	dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,CONVEX_2D_SHAPE_PROXYTYPE,convexAlgo2d);
+	dispatcher->registerCollisionCreateFunc(CONVEX_2D_SHAPE_PROXYTYPE,BOX_2D_SHAPE_PROXYTYPE,convexAlgo2d);
+	dispatcher->registerCollisionCreateFunc(BOX_2D_SHAPE_PROXYTYPE,BOX_2D_SHAPE_PROXYTYPE,new btBox2dBox2dCollisionAlgorithm::CreateFunc());
+
+	broadphase = new btDbvtBroadphase();
+	//m_broadphase = new btSimpleBroadphase();
+
+	///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
+	btSequentialImpulseConstraintSolver* sol = new btSequentialImpulseConstraintSolver;
+	solver = sol;
+
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+	//m_dynamicsWorld->getSolverInfo().m_erp = 1.f;
+	//m_dynamicsWorld->getSolverInfo().m_numIterations = 4;
 	
-	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration );
-	
-	dynamicsWorld->setGravity(btVector3(0 , -98.0 ,0));
+	dynamicsWorld->setGravity(btVector3(0,-10,0));
+
+//	debugDrawer = new BulletDebugDrawer(d3dDev);
+//	dynamicsWorld->setDebugDrawer(debugDrawer);
+//	dynamicsWorld->getDebugDrawer()->setDebugMode(0);
 
 	initGround();
 
@@ -332,7 +372,6 @@ int Game::init(void)
 	GameObject::setd3dDev(d3dDev);
 	GameObject::setAssetManager(assetManager);
 	GameObject::setCamera(&camera);
-	//GameObject::setOcean(ocean);
 	RigidObject::setBullet(&collisionShapes, dynamicsWorld);
 	Player::setInputManager(inputManager);
 	Model::setd3dDev(d3dDev);
@@ -352,15 +391,14 @@ int Game::init(void)
 
 int Game::initGround()
 {
-	btBoxShape* groundShape = new btBoxShape(btVector3(btScalar(9),btScalar(18),btScalar(9)));
-	//groundShape->initializePolyhedralFeatures();
-	//btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),50);
+	btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(5.),btScalar(50.),btScalar(150.)));
+//	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),50);
 	
 	collisionShapes.push_back(groundShape);
 
 	btTransform groundTransform;
 	groundTransform.setIdentity();
-	groundTransform.setOrigin(btVector3(0,-18,0));
+	groundTransform.setOrigin(btVector3(0,-50,0));
 
 	//We can also use DemoApplication::localCreateRigidBody, but for clarity it is provided here:
 	btScalar mass(0.);
@@ -379,6 +417,7 @@ int Game::initGround()
 
 	//add the body to the dynamics world
 	dynamicsWorld->addRigidBody(body);
+	
 	return 0;
 }
 
@@ -405,7 +444,7 @@ int Game::startGame(void)
 	hFieldOfView = 100.0f;
 	vFieldOfView = hFieldOfView * WND_HEIGHT / WND_WIDTH;
 	camera.setDimensions(wndWidth, wndHeight);
-	camera.setProj(0.1f, 5000.0, D3DXToRadian(vFieldOfView),  (WND_WIDTH*1.0f)/(WND_HEIGHT*1.0f));
+	camera.setProj(0.1f, 5000.0, D3DXToRadian(vFieldOfView), (WND_WIDTH*1.0f)/(WND_HEIGHT*1.0f));
 	
 	static long time = 1;
 	
@@ -483,6 +522,8 @@ int Game::update(long time)
 	{
 		//SetCursorPos(wndWidth/2, wndHeight/2);
 
+		dynamicsWorld->stepSimulation(1.f/60.f,10);
+		
 		if (inputManager->getKey(VK_ESCAPE) == 1) 
 		{
 			changeState(START_MENU);
@@ -496,13 +537,13 @@ int Game::update(long time)
 		{
 			changeState(START_MENU);
 			changeState(IN_GAME);
+			return 0;
 		}
 
 		//====================================================
 		//================= FIX PACKET FIRST =================
 		//====================================================
 		//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
 		/*	
 		if (inputManager->getKey('P') == 1) 
 		{
@@ -531,12 +572,25 @@ int Game::update(long time)
 			(*iter)->update(time);
 		}		
 
+		POINT cp;
+		GetCursorPos(&cp);
+
+		RECT rekt;
+		GetWindowRect(hwnd, &rekt);
+
+		cp.x -= rekt.left;
+		cp.y -= rekt.top;
+		cp.y = wndHeight - cp.y;
+
+		menuObjects.back()->setPosition(cp.x, cp.y);
+		//gameObjects.back()->setPosition(0,7.2,1);
+		if (inputManager->getMouseKey(0)) menuObjects.back()->modRotation(0.1f);
+		//else gameObjects.back()->setRotation(0);
+		
 		//player->setPosition(0, 10, 0);
 		//camera.setPosition(player->getPosition());	
 
-		camera.setPosition(player->getPosition());
-
-		//dynamicsWorld->stepSimulation(1.f/60.f,10);
+		camera.setPosition(0,wndHeight/4,0);
 	}
 	#pragma endregion
 		
@@ -547,17 +601,13 @@ int Game::renderFrame(long time)
 {
 	#pragma region Pre Draw Variable Updates
 	camera.setOrth(true);
-
+	camera.setDimensions(wndWidth*0.01f, wndHeight*0.01f);
 	camera.getViewMatrix(&viewMatrix);
 	camera.getProjMatrix(&projMatrix);
-
-	GameObject::setMatrices(&viewMatrix, &projMatrix);
-	
-	Quad::setMatrices(&viewMatrix, &projMatrix);
-
 	d3dDev->SetTransform(D3DTS_VIEW, &viewMatrix);
-	d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix);  
-	d3dDev->SetRenderState(D3DRS_ZENABLE, FALSE);
+	d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix); 
+	GameObject::setMatrices(&viewMatrix, &projMatrix);
+	Quad::setMatrices(&viewMatrix, &projMatrix);
 	#pragma endregion
 
 	#pragma region Render to Screen Texture
@@ -566,119 +616,94 @@ int Game::renderFrame(long time)
 	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 	d3dDev->BeginScene();
 
-	#pragma region START MENU
-	if (gameState == START_MENU)
-	{
-		list<MenuWindow *>::iterator iter;
-	
-		for (iter = menuObjects.begin(); iter != menuObjects.end(); iter++)
-		{
-			(*iter)->renderFrame(); 
-		}
-	}
-	#pragma endregion
+	list<GameObject *>::iterator iter;
+	for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+		(*iter)->renderFrame(time); 
 
-	#pragma region IN GAME
-	else if (gameState == IN_GAME)
-	{		
-		list<GameObject *>::iterator iter;
-	
-		for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
-		{
-			(*iter)->renderFrame(time); 
-		}
-		/*
-		d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
-		//draw debug wireframe stuff
-		d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
-		*/
-	}
-	#pragma endregion
+	//dynamicsWorld->debugDrawWorld();
+	//debugDrawer->drawLineBuffers();
+	/*
+	d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
+	//draw debug wireframe stuff
+	d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_SOLID);
+	*/
 
 	d3dDev->EndScene();
 	#pragma endregion
 
 	#pragma region Render to Backbuffer
 	d3dDev->SetRenderTarget(0, backBuffer);
-	//d3dDev->SetDepthStencilSurface(defStencil);
-	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-	d3dDev->BeginScene();
-		
-	camera.setOrth(true);
-	camera.getViewMatrix(&viewMatrix);
+	camera.setDimensions(wndWidth, wndHeight);
 	camera.getProjMatrix(&projMatrix);
-	d3dDev->SetTransform(D3DTS_VIEW, &viewMatrix);
-	d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix);  
-	d3dDev->SetRenderState(D3DRS_ZENABLE, FALSE);
+	//d3dDev->SetTransform(D3DTS_PROJECTION, &projMatrix); 
+	GameObject::setMatrices(&viewMatrix, &projMatrix);
+	Quad::setMatrices(&viewMatrix, &projMatrix);
+	
+	//d3dDev->SetDepthStencilSurface(defStencil);
+	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(100, 80, 20), 1.0f, 0);
+	d3dDev->BeginScene();
 
 	#pragma region Set Screen Texture Pos
-	D3DXVECTOR3 camUp = camera.getUpVector();
-	D3DXVECTOR3 camForward = camera.getLookAtVector();
-	D3DXVECTOR3 camRight;
-
-	D3DXVec3Cross(&camRight, &camForward, &camUp);
-	D3DXVec3Normalize(&camRight, &camRight);
 
 	VERTEX* vertices;
 	screenVertexBuffer->Lock(0, 0, (void**)&vertices, NULL);
 	
-	vertices[0].x = -0.5;
-	vertices[0].y = -0.5;
+	float width = surfaceDesc.Width;
+	float height = surfaceDesc.Height;
+	
+	vertices[0].x = 0.5;//+0.5;
+	vertices[0].y = 0.5;//+0.5;
 	vertices[0].z = 0.0f;
 	vertices[0].u = 1.0f;
 	vertices[0].v = 1.0f;
 	
-	vertices[1].x = surfaceDesc.Width-0.5;
-	vertices[1].y = -0.5;
+	vertices[1].x = width+0.5;
+	vertices[1].y = +0.5;
 	vertices[1].z = 0.0f;
 	vertices[1].u = 0.0f;
 	vertices[1].v = 1.0f;
 	
-	vertices[2].x = -0.5;
-	vertices[2].y = surfaceDesc.Height-0.5;
+	vertices[2].x = +0.5;
+	vertices[2].y = height+0.5;
 	vertices[2].z = 0.0f;
 	vertices[2].u = 1.0f;
 	vertices[2].v = 0.0f;
 		
-	vertices[3].x = surfaceDesc.Width-0.5;
-	vertices[3].y = surfaceDesc.Height-0.5;
+	vertices[3].x = width+0.5;//width+0.5;
+	vertices[3].y = height+0.5;//height+0.5;
 	vertices[3].z = 0.0f;
 	vertices[3].u = 0.0f;
 	vertices[3].v = 0.0f;
+	
 	 
 	screenVertexBuffer->Unlock();
 	#pragma endregion
 
+	/*
 	D3DXVECTOR3 left = D3DXVECTOR3(-1,0,0);
 	D3DXVECTOR3 up = D3DXVECTOR3(0,1,0);
-	D3DXVECTOR3 forward = D3DXVECTOR3(0,0,-1);
-	D3DXVECTOR3 position = D3DXVECTOR3(surfaceDesc.Width/2, -surfaceDesc.Height/2.0f, 1);
-	/*
-	D3DXMATRIX screenMatrix(left.x,		left.y,		left.z,		0.0f,
-							up.x,		up.y,		up.z,		0.0f,
-							forward.x,	forward.y,	forward.z,	0.0f,
-							position.x,	position.y,	position.z,	1.0f);
+	D3DXVECTOR3 forward = D3DXVECTOR3(0,0,1);
+	D3DXVECTOR3 position = D3DXVECTOR3(surfaceDesc.Width/2, -surfaceDesc.Height/2.0f, 0);
 
-		D3DXVECTOR3 position = D3DXVECTOR3(surfaceDesc.Width/2, -surfaceDesc.Height/2.0f, 1);
-		*/
-	
 	float y = surfaceDesc.Height/2;
 	D3DXMATRIX screenMatrix(left.x,		left.y,		left.z,		0.0f,
 							up.x,		up.y,		up.z,		0.0f,
 							forward.x,	forward.y,	forward.z,	0.0f,
-							surfaceDesc.Width/2,	-y,	10, 1.0f);
-		
+							position.x,	-y,	position.z,	1.0f);
+	*/
+
+	D3DXVECTOR3 position = D3DXVECTOR3(surfaceDesc.Width/2, surfaceDesc.Height/2, 0);
+
+	D3DXMATRIX screenMatrix(	-1,			0,			0,	0.0f,
+								0,			1,			0,	0.0f,
+								0,			0,			1,	0.0f,
+								position.x,	-position.y,0,	1.0f);
+
 	screenMatrix *= viewMatrix * projMatrix;
 
 	d3dDev->SetFVF(D3DFVF_VERTEX);
 	d3dDev->SetStreamSource(0, screenVertexBuffer, 0, sizeof(VERTEX));
-	
-	/*if (true)
-	{
-		//loadScreenEffect();
-		d3dDev->SetTexture(0, screenTexture);
-		d3dDev->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-	}*/
+
 	if (screenEffect)
 	{
 		screenEffect->SetMatrix(hMatrix, &screenMatrix);
@@ -703,20 +728,13 @@ int Game::renderFrame(long time)
 	#pragma endregion
 
 	#pragma region Render In Game UI
+	//camera.setDimensions(wndWidth*0.01f, wndHeight*0.01f);
+	//camera.getProjMatrix(&projMatrix);
+	list<MenuWindow *>::iterator iter2;
+	for (iter2 = menuObjects.begin(); iter2 != menuObjects.end(); iter2++)
+		(*iter2)->renderFrame(time); 
 	
-	if (gameState == IN_GAME)
-	{
-		//camera.setOrth(true);
-		//camera.getProjMatrix(&projMatrix);
-		//d3dDev->SetRenderState(D3DRS_ZENABLE, FALSE);
-
-		list<MenuWindow *>::iterator iter;
 	
-		for (iter = menuObjects.begin(); iter != menuObjects.end(); iter++)
-		{
-			(*iter)->renderFrame(); 
-		}
-	}
 	#pragma endregion
 
 	#pragma region Draw Debug Text
@@ -742,26 +760,26 @@ int Game::renderFrame(long time)
 
 int Game::cleanUp()
 {	
-	#pragma region Cleanup Bullet Physics
-	// remove the rigidbodies from the dynamics world and delete them
+	#pragma region Bullet
 	cleanBullet();
 
-	// delete dynamics world
 	delete dynamicsWorld;
-
-	// delete solver
+	
 	delete solver;
-
-	// delete broadphase
-	delete overlappingPairCache;
-
-	// delete dispatcher
+	
+	delete broadphase;
+	
 	delete dispatcher;
 
 	delete collisionConfiguration;
-	
-	// next line is optional : it will be cleared by the destructor when the array goes out of scope
-	collisionShapes.clear();
+
+	//delete debugDrawer;
+
+	dynamicsWorld = 0;
+	solver = 0;
+	broadphase = 0;
+	dispatcher = 0;
+	collisionConfiguration = 0;
 	#pragma endregion
 
 	backBuffer->Release();
@@ -797,25 +815,28 @@ int Game::cleanUp()
 
 int Game::cleanBullet()
 {
-	for (int i = dynamicsWorld->getNumCollisionObjects() -1; i >= 0; i--)
+	int i;
+	if (dynamicsWorld)
+	for (i=dynamicsWorld->getNumCollisionObjects()-1; i>=0 ;i--)
 	{
-		btCollisionObject * obj = dynamicsWorld->getCollisionObjectArray()[i];
-		btRigidBody * body = btRigidBody::upcast(obj);
+		btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
+		btRigidBody* body = btRigidBody::upcast(obj);
 		if (body && body->getMotionState())
 		{
 			delete body->getMotionState();
 		}
-		dynamicsWorld -> removeCollisionObject ( obj );
+		dynamicsWorld->removeCollisionObject( obj );
 		delete obj;
 	}
 	
-	// delete collision shapes
-	for (int j = 0; j < collisionShapes.size(); j++)
+	//delete collision shapes
+	for (int j=0;j<collisionShapes.size();j++)
 	{
-		btCollisionShape * shape = collisionShapes[j];
-		collisionShapes[j] = 0;
+		btCollisionShape* shape = collisionShapes[j];
 		delete shape;
 	}
+
+	collisionShapes.clear();
 
 	return 0;
 }
@@ -828,7 +849,7 @@ void Game::changeState(int targetState)
 	cleanBullet();
 	gameObjects.clear();
 	menuObjects.clear();
-
+	camera.setPosition(0,0,0);
 
 	#pragma region Clean Up Specific Objects
 	if (player)
@@ -853,90 +874,55 @@ void Game::changeState(int targetState)
 		ShowCursor(false);
 
 		//initGround();
-
-		D3DXVECTOR3 position;
-		float rotation;
-		float maxDist = 10.0f;
-
+		
 		player = new Player("Assets\\spritetest.png");
-		player->setPosition(0,0,1);
-		player->setSize(50,50);
-		//player->setScale(1,1,1);
+		player->setPosition(-100,50,1);
+		player->setSize(75, 75);
 		gameObjects.push_front(player);
 
-		for (int i = 0; i < 50; i++)
-		{
-			GameObject * square = new GameObject("Assets\\grass.jpg");
-			float x = rand() % 100;
-			float y = rand() % 100;
+		GameObject * box = new RigidObject("Assets\\afdsadfadfs.png");
+		box->setPosition(100, 100, 1);
+		box->setSize(100,100);
+		gameObjects.push_front(box);
 
-			square->setSize(300,300);
-			square->setPosition(x*10, y*10, 0);
-			gameObjects.push_front(square);
-		}
+		float x;
+		float y;
+		float maxDist = 300;
 
-		/*
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 25; i++)
 		{
-			GameObject * cube = new GameObject("Assets\\cube.x", position);
-			
-			float x = rand() % 100;
-			float y = rand() % 100;
-			float z = rand() % 100;
+			RigidObject * temp = new RigidObject("Assets\\afdsadfadfs.png");
+
+			x = rand() % 100;
+			y = rand() % 100;
 			x *= 0.01;
 			y *= 0.01;
-			z *= 0.01;
+			temp->setPosition(x*maxDist*2 - maxDist, 500+y*maxDist*2 - maxDist, 1);
+			
+			x = rand() % 100;
+			y = rand() % 100;
+			temp->setSize(x,y);
+			temp->setMass(x*y*0.001);
 
-			position = D3DXVECTOR3(x * maxDist*2.0f, y * 20.0f + 10.0f, z * maxDist*2.0f);
-			position -= D3DXVECTOR3(maxDist,0,maxDist);
-
-			//cube->setPosition(position);
-			//cube->setScale(0.1,0.1,0.1);
-
-			gameObjects.push_front(cube);
+			GameObject * tempObj = temp;
+			gameObjects.push_front(tempObj);
 		}
-		*/
 
-		/*GameObject * stoneSword = new GameObject("Assets\\stonesword.x");
-		stoneSword->setPosition(0,30,5);
-		//stoneSword->setVelocity(1,1,0);
-		//stoneSword->setScale(2, 5, 0.2);
-		gameObjects.push_front(stoneSword);
-		*/
-
-		/*GameObject * test = new GameObject("Assets\\testtasdffasd.x");
-		test->setPosition(0,0,10);
-		gameObjects.push_front(test);
-		*/
-
+		RigidObject * ground = new RigidObject("Assets\\terr.png");
+		ground->setMass(0);
+		ground->setSize(1000,300);
+		ground->setPosition(0, -150, 0);
+		GameObject * groundObj = ground;
+		gameObjects.push_front(groundObj);
+		
 		MenuWindow * healthBars = new MenuWindow("Assets\\HealthTemp.png");
 		healthBars->setSize(300,75);
 		healthBars->setPosition(50, 50, BOT_LEFT);
 		menuObjects.push_front(healthBars);
 
-		MenuWindow * healthBars2 = new MenuWindow("Assets\\HealthTemp.png");
-		healthBars2->setSize(300,75);
-		healthBars2->setPosition(50, -50, TOP_LEFT);
-		menuObjects.push_front(healthBars2);
-		/*
-		pauseWindow.init("Assets\\transtest.png");
-		pauseWindow.setSize(400,150);
-		pauseWindow.setPosition(0,50,MID_TOP);
-	
-		healthBars.init("Assets\\HealthTemp.png");
-		healthBars.setSize(300,75);
-		healthBars.setPosition(50, -50, BOT_LEFT);
-	
-		flask.initGeom("Assets\\flask.x");
-		flask.setPosition(0,0,-5);
-		*/
-
-		//ocean = new Ocean();
-		//GameObject::setOcean(ocean);
-
-		//floor = new World("Assets\\floor.x");
-		//gameObjects.push_front(floor);
-		//floor->setScale(20,10,20);
+		MenuWindow * crosshair = new MenuWindow("Assets\\crosshair.png");
+		crosshair->setSize(25,25);
+		menuObjects.push_back(crosshair);
 	}
 
 	gameState = targetState;

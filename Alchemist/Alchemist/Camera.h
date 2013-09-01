@@ -70,5 +70,5 @@ private:
 	float farPlane;
 	float fieldOfView;
 	float aspectRatio;
-	int wndWidth, wndHeight;
+	float wndWidth, wndHeight;
 };

@@ -160,8 +160,8 @@ float4 ShaderPS(PixelData input) : SV_TARGET
 {
 	float4 col = tex2D(TexS, input.tex0);
 	
-	float x = (col.r + col.b + col.g) / 3;
-	col = float4(x,x,x,1);
+	//float x = (col.r + col.b + col.g) / 3;
+	//col = float4(x,x,x,1);
 
 	//col = getEdge( input.tex0 );
 

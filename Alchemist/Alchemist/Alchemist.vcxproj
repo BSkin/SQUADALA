@@ -148,6 +148,7 @@
     <ClInclude Include="Alchemist.h" />
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="BulletDebugDrawer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="Effect.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="Alchemist.cpp" />
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="BulletDebugDrawer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="Game.cpp" />
