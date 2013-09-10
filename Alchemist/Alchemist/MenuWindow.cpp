@@ -24,20 +24,22 @@ void MenuWindow::setSize(int x, int y)
 {
 	width = x;
 	height = y;
-	quad.setSize(width, height);
+	//quad.setSize(width, height);
 }
 
 void MenuWindow::setSizePercentage(float x, float y)
 {
-	if (x > 1.0f) x = 1.0f;
-	if (x < 0.0f) x = 0.0f;
-	if (y > 1.0f) y = 1.0f;
-	if (y < 0.0f) y = 0.0f;
+	/*
+	x = min(1.0, x);
+	x = max(0.0, x);
+	y = min(1.0, y);
+	y = max(0.0, y);
+	*/
 
 	width = wndWidth * x;
 	height = wndHeight * y;
 
-	quad.setSize(width, height);
+	//quad.setSize(width, height);
 }
 
 void MenuWindow::setPosition(int x, int y, int anchor)

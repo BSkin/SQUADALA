@@ -148,6 +148,8 @@
     <ClInclude Include="Alchemist.h" />
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="BodyPart.h" />
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="BulletDebugDrawer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Character.h" />
@@ -164,6 +166,7 @@
     <ClInclude Include="Packet.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="ProjectileManager.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="RawInputManager.h" />
     <ClInclude Include="RigidObject.h" />
@@ -177,6 +180,8 @@
     <ClCompile Include="Alchemist.cpp" />
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="BodyPart.cpp" />
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="BulletDebugDrawer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Character.cpp" />
@@ -189,6 +194,7 @@
     <ClCompile Include="Packet.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="ProjectileManager.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="RawInputManager.cpp" />
     <ClCompile Include="RigidObject.cpp" />

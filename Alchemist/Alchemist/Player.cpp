@@ -1,161 +1,155 @@
 #include "Player.h"
 
 RawInputManager *	Player::inputManager =	NULL;
+D3DXVECTOR2 		Player::cursorPos =		D3DXVECTOR2(0,0);
 
-Player::Player(void) : Character()
+Player::Player(void) : Character("Assets\\Player\\Leg Sprites.png"), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL)
 {
-	
+	directory = "Assets\\Player\\Leg Sprites.png";
 }
 
-Player::Player(char *fileBase) : Character(fileBase)
-{
-	
-}
-
-Player::Player(short ID) : Character(ID)
+Player::Player(short ID) : Character(ID), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL)
 {
 	
 }
 
 Player::~Player(void)
 {
-	
+	delete torso;
+	delete head;
+	delete frontArms;
+	delete backArms;
 }
-
-/*
-int Player::initBullet()
-{
-	float SCALE = 1;
-	
-	colShape = new btBoxShape(btVector3(scale.x,scale.y,scale.z));
-	//btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-	collisionShapes->push_back(colShape);
-
-	/// Create Dynamic Objects
-	btTransform startTransform;
-	startTransform.setIdentity();
-
-	btScalar mass(1.f);
-		
-	//rigidbody is dynamic if and only if mass is non zero, otherwise static
-	bool isDynamic = (mass != 0.f);
-
-	btVector3 localInertia(0,0,0);
-	if (isDynamic)
-		colShape->calculateLocalInertia(mass,localInertia);
-		
-	startTransform.setOrigin(btVector3(
-					btScalar(position.x),
-					btScalar(position.y),
-					btScalar(position.z)));
-
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
-	body = new btRigidBody(rbInfo);
-
-	dynamicsWorld->addRigidBody(body);
-
-	//body->setGravity(btVector3(0,0,0));
-	body->setFriction(0.5f);
-
-	return 0;
-}
-*/
 
 int Player::initGeom()
 {
+	if (torso == NULL)		torso = new		BodyPart(width*0.146484375, height*0.68359375,	"Assets\\Player\\Body Sprite.png",		1, 1);
+	if (head == NULL)		head = new		BodyPart(width*0.126953125,	height*0.25390625,	"Assets\\Player\\Head Sprite.png",		1, 1);
+	if (frontArms == NULL)	frontArms = new BodyPart(width*1.46484375,	height*0.29296875,	"Assets\\Player\\Arm Front Sprite.png",	2, 1);
+	if (backArms == NULL)	backArms = new	BodyPart(width*1.46484375,	height*0.29296875,	"Assets\\Player\\Arm Back Sprite.png",	2, 1);
+	if (crosshair == NULL)	crosshair = new	BodyPart(0.5,				0.5,				"Assets\\Player\\Crosshair.png",		1, 1);
+
 	GameObject::initGeom();
 	numSpriteCols = 7;
 	numSpriteRows = 3;
-	//body->activate(true);
-	//body->translate(btVector3(position.x, position.y, position.z));
 	return 0;
 }
 
 int Player::update(long time)
 {
-	//if (inputManager->getKey('W') > 0) moveUp();
-	//if (inputManager->getKey('S') > 0) moveDown();
-	//acceleration = D3DXVECTOR3(0,-0.167, 0);
-
-	//velocity += acceleration;
 	direction = D3DXVECTOR3(0,0,0);	
 
-	if (inputManager->getKey('W') > 0) moveUp();
-	if (inputManager->getKey('S') > 0) moveDown();
-	if (inputManager->getKey('D') > 0) moveRight();
-	if (inputManager->getKey('A') > 0) moveLeft();
+	if (inputManager->keyDown('W')) moveUp();
+	if (inputManager->keyDown('S')) moveDown();
+	if (inputManager->keyDown('D')) moveRight();
+	if (inputManager->keyDown('A')) moveLeft();
 
-	if (direction.x < 0) flipSprite = true;
-	else if (direction.x > 0) flipSprite = false;
-	
-	//if (position.y > height/2)
-	//{
-	//	curSpriteRow = 2;
-	//	curSpriteCol = 0;
-	//}
-	//else
-	//{
-		if (direction.x) { curSpriteRow = 0; curSpriteCol = (int)time*0.125; }
-		else { curSpriteRow = 1; curSpriteCol = 0; }
-	//}
+	if (inputManager->getMouseKeyPress(0))
+	{
+		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png");
+		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*100, 
+							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*100, 
+							position.z);//frontArms->getPosition()*100);
+		bullet->setSize(55, 5);
+		bullet->setRotation(frontArms->getRotation());
+		bullet->setSpeed(30);
+		projectileManager->addObject(bullet);
+	}
+	if (inputManager->getMouseKeyDown(1))
+	{
+		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png");
+		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*100, 
+							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*100, 
+							position.z);//frontArms->getPosition()*100);
+		bullet->setSize(55, 5);
+		bullet->setRotation(frontArms->getRotation());
+		bullet->setSpeed(30);
+		projectileManager->addObject(bullet);
+	}
 
-	//position = D3DXVECTOR3(body->getCenterOfMassPosition().x(), body->getCenterOfMassPosition().y(), body->getCenterOfMassPosition().z());
+	if (inputManager->keyPress('1')) 
+	{
+		frontArms->setCurRow(0);
+		backArms->setCurCol(0);
+	}
+	else if (inputManager->keyPress('2')) 
+	{
+		frontArms->setCurRow(1);
+		backArms->setCurCol(1);
+	}
+
+	if (abs(body->getLinearVelocity().y()) > 0.5) 
+		{ curSpriteRow = 2; curSpriteCol = 0; }
+	else
+	{
+		if (direction.x) 
+		{ 
+				curSpriteRow = 0; 
+				if (flipSprite) curSpriteCol = (int)time*(-direction.x)*0.125;
+				else curSpriteCol = (int)time*direction.x*0.125; 
+		}
+		else 
+			{ curSpriteRow = 1; curSpriteCol = 0; }
+	}
 
 	velocity.x = speed*0.01 * direction.x;
-	//if (inputManager->getKey(VK_SPACE) == 1) body->setLinearVelocity(body->getLinearVelocity() + btVector3(0,5,0));
-	//if (inputManager->getKey(VK_SPACE) == 1) body->setLinearVelocity(btVector3(body->getLinearVelocity().x(), 5, 0));
-	if (inputManager->getKey(VK_SPACE) == 1) body->setLinearVelocity(btVector3(0, 5, 0));
+	if (inputManager->keyPress(VK_SPACE)) body->setLinearVelocity(body->getLinearVelocity() + btVector3(0,5,0));
 
-	
-	//position += velocity;
-	
-
-	//body->activate(true);
 	body->translate(btVector3(velocity.x, velocity.y, velocity.z));
+	body->setAngularVelocity(btVector3(0,0,0));
 	body->setAngularFactor(0);
 	body->activate(true);
-	//body->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
 
-	/*
-	#pragma region Calculate World Matrix
-	D3DXMATRIX scaleMatrix, translationMatrix, rotationMatrix;
-	
-	D3DXMatrixIdentity(&worldMatrix);
-	D3DXMatrixScaling(&scaleMatrix, scale.x, scale.y, scale.z);
-	D3DXMatrixTranslation(&translationMatrix, position.x, position.y, position.z);
-	D3DXMatrixRotationY(&rotationMatrix, horizontalRotation+3.14159f);
-	
-	worldMatrix = rotationMatrix * translationMatrix;
-	#pragma endregion
-	
-	#pragma region Set Physics Object Transform
-	btTransform bulletTransformMatrix;
-	btVector3 R,U,L,P;
-	R.setX(btScalar(worldMatrix._11)); R.setY(btScalar(worldMatrix._12)); R.setZ(btScalar(worldMatrix._13));
-	U.setX(btScalar(worldMatrix._21)); U.setY(btScalar(worldMatrix._22)); U.setZ(btScalar(worldMatrix._23));
-	L.setX(btScalar(worldMatrix._31)); L.setY(btScalar(worldMatrix._32)); L.setZ(btScalar(worldMatrix._33));
-	P.setX(btScalar(worldMatrix._41)); P.setY(btScalar(worldMatrix._42)); P.setZ(btScalar(worldMatrix._43));
-
-	btMatrix3x3 bMatrix;
-	bMatrix = btMatrix3x3(R.x(), R.y(), R.z(), U.z(), U.y(), U.z(), L.x(), L.y(), L.z());
-	bulletTransformMatrix.setBasis(bMatrix);
-	bulletTransformMatrix.setOrigin(P);
-
-	body->setWorldTransform(bulletTransformMatrix);
-	body->activate(true);
-
-	worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
-
-	#pragma endregion
-	*/
-
-	return 0;
+	return Character::update(time);
 }
 
 int Player::renderFrame(long time)
 {
-	return Character::renderFrame(time);
+	flipSprite = (cursorPos.x+camera->getPosition().x-position.x) < 0;
+	Character::renderFrame(time);
+	
+	torso->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.2);
+	head->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.3);
+	frontArms->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.4);
+	backArms->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.1);
+	crosshair->setPosition(cursorPos.x*100, cursorPos.y*100, renderPosition.z - 0.5);
+	
+	aimRotation = atan2(cursorPos.y + camera->getPosition().y - position.y,
+						cursorPos.x + camera->getPosition().x - position.x);
+
+	if (flipSprite) aimRotation += 3.14159f;
+	if (aimRotation > 3.14159) aimRotation -= 3.14159*2.0;
+
+	torso->setRotation(aimRotation*0.25);
+	head->setRotation(aimRotation*0.75);
+
+	head->modPosition(D3DXVECTOR3(	cos(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.5, 
+									sin(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.5, 0));
+
+	frontArms->modPosition(D3DXVECTOR3(	cos(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425,
+										sin(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425, 0));
+
+	backArms->setPosition(frontArms->getPosition().x*100, frontArms->getPosition().y*100, renderPosition.z - 0.1);
+	
+	frontArms->setRotation(atan2(	cursorPos.y - frontArms->getPosition().y,
+									cursorPos.x - frontArms->getPosition().x));
+	if (flipSprite) frontArms->modRotation(3.14159f);
+	if (frontArms->getRotation() > 3.14159) frontArms->modRotation(-3.14159*2.0); 
+	
+	backArms->render(	backArms->getPosition(),	-frontArms->getRotation(),	flipSprite,	time);
+	torso->render(		torso->getPosition(),		-torso->getRotation(),		false,		time);
+	head->render(		head->getPosition(),		-head->getRotation(),		flipSprite, time);
+	frontArms->render(	frontArms->getPosition(),	-frontArms->getRotation(),	flipSprite, time);
+	crosshair->render(	crosshair->getPosition(),	0.0,						false,		time);
+
+	frontArms->setPosition(position.x*100, position.y*100, renderPosition.z - 0.4);
+	frontArms->modPosition(D3DXVECTOR3(	cos(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425,
+										sin(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425, 0));
+
+	if (flipSprite) frontArms->modRotation(-3.14159);
+	if (frontArms->getRotation() < 3.14159) frontArms->modRotation(3.14159*2.0); 
+
+	return 0;
 }
 
 int Player::setInputManager(RawInputManager * iManager)
@@ -167,3 +161,5 @@ int Player::setInputManager(RawInputManager * iManager)
 	}
 	return -1;
 }
+
+void Player::setCursorPos(D3DXVECTOR2 p) { cursorPos = p;}

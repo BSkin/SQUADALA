@@ -1,8 +1,8 @@
 #include "Game.h"
 
 #pragma region Game Constants
-#define WND_WIDTH 1280
-#define WND_HEIGHT 720
+#define WND_WIDTH 1920
+#define WND_HEIGHT 1200
 #define FRAMES_PER_SECOND 60
 
 #define START_MENU	0
@@ -15,8 +15,8 @@ IDirect3DDevice9 * Game::d3dDev = NULL;
 IDirect3D9 * Game::md3d = NULL;
 AssetManager * Game::assetManager = NULL;
 RawInputManager * Game::inputManager = NULL;
-int Game::wndWidth = 0;
-int Game::wndHeight = 0;
+float Game::wndWidth = 0;
+float Game::wndHeight = 0;
 short Game::networkState = 0;
 short Game::numClients = 0;
 bool Game::activeWindow = true;
@@ -83,7 +83,7 @@ LRESULT Game::globalWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 Game::Game(HINSTANCE hInst, char* gameName) : countsPerSecond(0.0), CounterStart(0), frameCount(0), fps(0), frameTimeOld(0), frameTime(0.0), 
-												menuObjects(), gameObjects(), floor(0), player(0), sunDir(1,-1,0), screenEffect(0),
+												menuObjects(), gameObjects(), player(0), sunDir(1,-1,0), screenEffect(0),
 												renderSurface(NULL), backBuffer(NULL)
 { 
 	fullScreen = false;
@@ -355,9 +355,9 @@ int Game::init(void)
 	
 	dynamicsWorld->setGravity(btVector3(0,-10,0));
 
-//	debugDrawer = new BulletDebugDrawer(d3dDev);
-//	dynamicsWorld->setDebugDrawer(debugDrawer);
-//	dynamicsWorld->getDebugDrawer()->setDebugMode(0);
+	debugDrawer = new BulletDebugDrawer(d3dDev);
+	dynamicsWorld->setDebugDrawer(debugDrawer);
+	dynamicsWorld->getDebugDrawer()->setDebugMode(0);
 
 	initGround();
 
@@ -367,6 +367,7 @@ int Game::init(void)
 	setd3dDev(d3dDev);
 	AssetManager::setd3dDev(d3dDev);
 	AssetLoader::setd3dDev(d3dDev);
+	RawInputManager::setWindowVariables(&wndWidth, &wndHeight, &hwnd);
 	Quad::setD3dDev(d3dDev);
 	Quad::setAssetManager(assetManager);
 	GameObject::setd3dDev(d3dDev);
@@ -374,6 +375,7 @@ int Game::init(void)
 	GameObject::setCamera(&camera);
 	RigidObject::setBullet(&collisionShapes, dynamicsWorld);
 	Player::setInputManager(inputManager);
+	Character::setProjectileManager(&projectileManager);
 	Model::setd3dDev(d3dDev);
 	SkinnedData::setd3dDev(d3dDev);
 	MenuWindow::setStatics(&camera, wndWidth, wndHeight);
@@ -481,11 +483,14 @@ int Game::startGame(void)
 			frameTime = getFrameTime();
 			#pragma endregion
 
-			int rc = update(time);
-			if (rc < 0) break;
+			if (activeWindow)
+			{
+				int rc = update(time);
+				if (rc < 0) break;
 
-			renderFrame(time);
-			time++;
+				renderFrame(time);
+				time++;
+			}
         
 			CurrentTime = GetTickCount();
 			ElapsedTime = CurrentTime - LastRenderTime;
@@ -508,12 +513,12 @@ int Game::update(long time)
 	#pragma region Start Menu
 	if (gameState == START_MENU)
 	{
-		if (inputManager->getKey(VK_RETURN))
+		if (inputManager->keyPress(VK_RETURN))
 		{
 			changeState(IN_GAME);
 			return 0;
 		}
-		if (inputManager->getKey(VK_ESCAPE) == 1) return -1;
+		if (inputManager->keyPress(VK_ESCAPE)) return -1;
 	}
 	#pragma endregion
 
@@ -522,18 +527,15 @@ int Game::update(long time)
 	{
 		//SetCursorPos(wndWidth/2, wndHeight/2);
 
-		dynamicsWorld->stepSimulation(1.f/60.f,10);
+		dynamicsWorld->stepSimulation(1.f/60.f,1);
 		
-		if (inputManager->getKey(VK_ESCAPE) == 1) 
+		if (inputManager->keyPress(VK_ESCAPE)) 
 		{
 			changeState(START_MENU);
 			return 0;
 		}
-
-		if (inputManager->getKey('F') == 1) camera.setType(FIRST_PERSON);
-		else if (inputManager->getKey('C') == 1) camera.setType(THIRD_PERSON);
-
-		if (inputManager->getKey('O') == 1) 
+		
+		if (inputManager->keyPress('O')) 
 		{
 			changeState(START_MENU);
 			changeState(IN_GAME);
@@ -565,32 +567,16 @@ int Game::update(long time)
 		//================= FIX PACKET FIRST =================
 		//====================================================
 
+		D3DXVECTOR2 p = inputManager->getMousePos() * 0.01;
+		player->setCursorPos(p);
+		//crosshair->setPosition(cp.x, cp.y);
+
 		list<GameObject *>::iterator iter;
-	
 		for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
-		{
 			(*iter)->update(time);
-		}		
 
-		POINT cp;
-		GetCursorPos(&cp);
-
-		RECT rekt;
-		GetWindowRect(hwnd, &rekt);
-
-		cp.x -= rekt.left;
-		cp.y -= rekt.top;
-		cp.y = wndHeight - cp.y;
-
-		menuObjects.back()->setPosition(cp.x, cp.y);
-		//gameObjects.back()->setPosition(0,7.2,1);
-		if (inputManager->getMouseKey(0)) menuObjects.back()->modRotation(0.1f);
-		//else gameObjects.back()->setRotation(0);
-		
 		//player->setPosition(0, 10, 0);
 		//camera.setPosition(player->getPosition());	
-
-		camera.setPosition(0,wndHeight/4,0);
 	}
 	#pragma endregion
 		
@@ -613,15 +599,14 @@ int Game::renderFrame(long time)
 	#pragma region Render to Screen Texture
 	d3dDev->SetRenderTarget(0, renderSurface);
 	//d3dDev->SetDepthStencilSurface(screenStencil);
-	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(150, 150, 100), 1.0f, 0);
 	d3dDev->BeginScene();
 
 	list<GameObject *>::iterator iter;
 	for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
 		(*iter)->renderFrame(time); 
 
-	//dynamicsWorld->debugDrawWorld();
-	//debugDrawer->drawLineBuffers();
+	projectileManager.render(time);
 	/*
 	d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
 	//draw debug wireframe stuff
@@ -640,7 +625,7 @@ int Game::renderFrame(long time)
 	Quad::setMatrices(&viewMatrix, &projMatrix);
 	
 	//d3dDev->SetDepthStencilSurface(defStencil);
-	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(100, 80, 20), 1.0f, 0);
+	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(200, 30, 150), 1.0f, 0);
 	d3dDev->BeginScene();
 
 	#pragma region Set Screen Texture Pos
@@ -734,7 +719,8 @@ int Game::renderFrame(long time)
 	for (iter2 = menuObjects.begin(); iter2 != menuObjects.end(); iter2++)
 		(*iter2)->renderFrame(time); 
 	
-	
+	//dynamicsWorld->debugDrawWorld();
+	//debugDrawer->drawLineBuffers();
 	#pragma endregion
 
 	#pragma region Draw Debug Text
@@ -786,20 +772,25 @@ int Game::cleanUp()
 	renderSurface->Release();
 	delete md3dpp;
 
+	list<GameObject *>::iterator iter;
+	for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+	{
+		if (*iter)
+		{
+			delete *iter;
+			*iter = 0;
+		}
+	}
 	gameObjects.clear();
-	menuObjects.clear();
 
-	if (player)
+	list<MenuWindow *>::iterator iter2;
+	for (iter2 = menuObjects.begin(); iter2 != menuObjects.end(); iter2++)
+	if (*iter2)
 	{
-		delete player;
-		player = 0;
+		delete *iter2;
+		*iter2 = 0;
 	}
-	
-	if (floor)
-	{
-		delete floor;
-		floor = 0;
-	}
+	menuObjects.clear();
 
 	delete assetManager;
 	while (gameObjects.size() > 0) gameObjects.pop_back();
@@ -847,17 +838,31 @@ void Game::changeState(int targetState)
 
 	#pragma region Pre Change Cleanup
 	cleanBullet();
+
+	list<GameObject *>::iterator iter;
+	for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+	{
+		if (*iter)
+		{
+			delete *iter;
+			*iter = 0;
+		}
+	}
 	gameObjects.clear();
+
+	list<MenuWindow *>::iterator iter2;
+	for (iter2 = menuObjects.begin(); iter2 != menuObjects.end(); iter2++)
+	if (*iter2)
+	{
+		delete *iter2;
+		*iter2 = 0;
+	}
 	menuObjects.clear();
+
+	projectileManager.clearList();
+
 	camera.setPosition(0,0,0);
 
-	#pragma region Clean Up Specific Objects
-	if (player)
-	{
-		delete player;
-		player = 0;
-	}
-	#pragma endregion
 	#pragma endregion
 
 	if (targetState == START_MENU)
@@ -872,18 +877,14 @@ void Game::changeState(int targetState)
 	else if (targetState == IN_GAME)
 	{
 		ShowCursor(false);
-
+		camera.setPosition(0,wndHeight/4,0);
 		//initGround();
 		
-		player = new Player("Assets\\spritetest.png");
-		player->setPosition(-100,50,1);
-		player->setSize(75, 75);
-		gameObjects.push_front(player);
-
-		GameObject * box = new RigidObject("Assets\\afdsadfadfs.png");
-		box->setPosition(100, 100, 1);
-		box->setSize(100,100);
-		gameObjects.push_front(box);
+		player = new Player();
+		player->setPosition(-100,650,1);
+		player->setSize(150, 150);
+		GameObject * p = player;
+		gameObjects.push_front(p);
 
 		float x;
 		float y;
@@ -891,7 +892,7 @@ void Game::changeState(int targetState)
 
 		for (int i = 0; i < 25; i++)
 		{
-			RigidObject * temp = new RigidObject("Assets\\afdsadfadfs.png");
+			RigidObject * temp = new RigidObject("Assets\\crate.png");
 
 			x = rand() % 100;
 			y = rand() % 100;
@@ -901,8 +902,10 @@ void Game::changeState(int targetState)
 			
 			x = rand() % 100;
 			y = rand() % 100;
-			temp->setSize(x,y);
-			temp->setMass(x*y*0.001);
+			if (x < 50) x += 50;
+			//x -= 25;
+			temp->setSize(x,x);
+			temp->setMass(x*x*0.001);
 
 			GameObject * tempObj = temp;
 			gameObjects.push_front(tempObj);
@@ -920,9 +923,9 @@ void Game::changeState(int targetState)
 		healthBars->setPosition(50, 50, BOT_LEFT);
 		menuObjects.push_front(healthBars);
 
-		MenuWindow * crosshair = new MenuWindow("Assets\\crosshair.png");
-		crosshair->setSize(25,25);
-		menuObjects.push_back(crosshair);
+		//crosshair = new MenuWindow("Assets\\Player\\Crosshair.png");
+		//crosshair->setSize(50,50);
+		//menuObjects.push_back(crosshair);
 	}
 
 	gameState = targetState;

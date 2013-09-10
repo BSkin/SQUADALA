@@ -64,14 +64,20 @@
     <Filter Include="Header Files\Engine Components\Engine Objects">
       <UniqueIdentifier>{0bfce52d-3e90-4400-83a3-c75f7e014319}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine Components\Engine Objects\Game Objects">
-      <UniqueIdentifier>{b71a926d-4687-4e70-9fb4-740310fe7589}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine Components\Engine Objects">
       <UniqueIdentifier>{b0b5e2a7-5287-443c-9390-1c9a780fc273}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Engine Components\Engine Objects\Game Objects">
       <UniqueIdentifier>{56e039c9-d1af-4be0-b807-c44486dc112f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components\Engine Objects\Game Objects\Player">
+      <UniqueIdentifier>{1b842ab2-5014-4778-aca3-a7444abadb76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Engine Objects\Game Objects">
+      <UniqueIdentifier>{b71a926d-4687-4e70-9fb4-740310fe7589}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Engine Objects\Game Objects\Player">
+      <UniqueIdentifier>{79490ae2-4372-4008-a9e5-fa263648c8b7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -141,9 +147,6 @@
     <ClInclude Include="Packet.h">
       <Filter>Header Files\Engine Components\Networking</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
-    </ClInclude>
     <ClInclude Include="RigidObject.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClInclude>
@@ -155,6 +158,18 @@
     </ClInclude>
     <ClInclude Include="MenuWindow.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="BodyPart.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileManager.h">
+      <Filter>Header Files\Engine Components\Particle System</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -203,9 +218,6 @@
     <ClCompile Include="Packet.cpp">
       <Filter>Source Files\Engine Components\Networking</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
-    </ClCompile>
     <ClCompile Include="RigidObject.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClCompile>
@@ -217,6 +229,18 @@
     </ClCompile>
     <ClCompile Include="MenuWindow.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="BodyPart.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectileManager.cpp">
+      <Filter>Source Files\Engine Components\Particle System</Filter>
+    </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

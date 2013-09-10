@@ -12,12 +12,12 @@ BulletDebugDrawer::~BulletDebugDrawer()
 
 void BulletDebugDrawer::drawLineBuffers()
 {
-	/*
+	
 	D3DXMATRIXA16 matWorld;
 	D3DXMatrixIdentity( &matWorld );
 	device->SetTransform( D3DTS_WORLD, &matWorld );
-	//device->SetRenderState(D3DRS_ZENABLE, FALSE);
-	device->SetVertexShader( NULL );
+	device->SetRenderState(D3DRS_ZENABLE, FALSE);
+	//device->SetVertexShader( NULL );
 	device->SetPixelShader( NULL );
 	device->SetFVF( D3DFVF_CUSTOMVERTEX_VC );
 	if( numLines>0 )
@@ -26,7 +26,7 @@ void BulletDebugDrawer::drawLineBuffers()
 	numLines=0;
 
 	device->SetRenderState(D3DRS_ZENABLE, TRUE);
-	*/
+	
 }
 
 void BulletDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor)
@@ -43,7 +43,8 @@ void BulletDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const
 		drawLineBuffers();
 	}
 
-	int colour = 0xff000000 | ((int)color[0]<<16) | ((int)color[1]<<8) | ((int)color[2]);
+	//int colour = 0xff000000 | ((int)color[0]<<16) | ((int)color[1]<<8) | ((int)color[2]);
+	int colour = 0xff000000 | (255<<16) | (0<<8) | (0);
 
 	gLines[numLinesVerts].x = from[0];
 	gLines[numLinesVerts].y = from[1];

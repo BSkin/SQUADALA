@@ -5,7 +5,6 @@
 #include "Camera.h"
 #include "AssetManager.h"
 #include "Quad.h"
-#include "btBulletDynamicsCommon.h"
 
 /*
 #include <string>
@@ -35,9 +34,14 @@ public:
 	void modVelocity(float, float, float);
 	void modVelocity(D3DXVECTOR3);
 
+	float getWidth();
+	float getHeight();
+	float getRotation();
+
 	void setPosition(D3DXVECTOR3);
 	virtual void setPosition(float x, float y, float z);
 	void setPositionY(float y);
+	void modPosition(D3DXVECTOR3);
 	virtual void setSize(int x, int y);
 	void setVelocity(D3DXVECTOR3);
 	void setVelocity(float x, float y, float z);
@@ -46,6 +50,8 @@ public:
 	void setRotation(float x);
 	void modRotation(float x);
 	void setID(short);
+	void setCurRow(short);
+	void setCurCol(short);
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
@@ -55,6 +61,7 @@ protected:
 	friend class Packet;
 
 	Quad quad;
+	IDirect3DTexture9 * texture;
 	ID3DXEffect * actorShader;
 	
 	string directory;

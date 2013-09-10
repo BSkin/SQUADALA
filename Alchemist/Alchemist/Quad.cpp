@@ -12,31 +12,25 @@ const D3DVERTEXELEMENT9 VERTEX::Decl[] =
     D3DDECL_END()
 };
 
-Quad::Quad() : position(0,0,0), lookAt(0,0,-1), upVector(0,1,0), width(640.0f), height(360.0f), texture(0), vertexBuffer(0)
+Quad::Quad() : vertexBuffer(0)
 {
-	directory = "";
 }
 
 Quad::~Quad()
 {}
 
-int Quad::init(const char *dir)
+int Quad::init()
 {
-	directory = dir;
-	int x = 2;
-
-	//Set Dimensions
-	D3DXIMAGE_INFO SrcInfo;
-	D3DCOLOR colorkey = 0xFFFF00FF;
-
-	//Load Texture
-	if (texture == 0) assetManager->getTexture(dir, &texture);
+	//D3DXIMAGE_INFO SrcInfo;
+	//D3DCOLOR colorkey = 0xFFFF00FF;
 
 	if (vertexBuffer == 0) 
 		d3dDev->CreateVertexBuffer(sizeof(VERTEX) * 4, NULL, D3DFVF_VERTEX, D3DPOOL_MANAGED, &vertexBuffer, NULL);
 
 	return 0;
 }
+
+bool Quad::vertexLoaded() { return vertexBuffer == 0; }
 
 int Quad::setD3dDev(IDirect3DDevice9 *Dev)
 {
@@ -60,7 +54,7 @@ int Quad::setAssetManager(AssetManager *ass)
 
 int Quad::update(long time)
 {
-	modSize(0.5f,0.5f);
+	//modSize(0.5f,0.5f);
 	return 0;
 }
 
@@ -73,15 +67,14 @@ int Quad::update(long time)
 
 int Quad::render(long time)
 {
-	if (texture == 0 || vertexBuffer == 0) 
-		init(directory.c_str());
+	if (vertexBuffer == 0) init();
 	else
 	{
 		VERTEX* vertices;
 		vertexBuffer->Lock(0, 0, (void**)&vertices, NULL);
 	
-		float hWidth = width/2.0f;
-		float hHeight = height/2.0f;
+		//float hWidth = width/2.0f;
+		//float hHeight = height/2.0f;
 		
 		vertices[0].x = -0.5f;
 		vertices[0].y = -0.5f;
@@ -144,9 +137,9 @@ int Quad::render(long time)
 	return 0;
 }
 
-void Quad::modSize(float X, float Y) { width += X; height += Y; }
-void Quad::setSize(float Width, float Height) { width = Width; height = Height; }
-void Quad::modPos(float X, float Y, float Z) { position.x += X; position.y += Y; position.z += Z; }
-void Quad::modPos(D3DXVECTOR3 Mod) { position += Mod; }
-void Quad::setPos(float X, float Y, float Z) { position = D3DXVECTOR3(X, Y, Z); }
-void Quad::setPos(D3DXVECTOR3 Pos) { position = Pos; }
+//void Quad::modSize(float X, float Y) { width += X; height += Y; }
+//void Quad::setSize(float Width, float Height) { width = Width; height = Height; }
+//void Quad::modPos(float X, float Y, float Z) { position.x += X; position.y += Y; position.z += Z; }
+//void Quad::modPos(D3DXVECTOR3 Mod) { position += Mod; }
+//void Quad::setPos(float X, float Y, float Z) { position = D3DXVECTOR3(X, Y, Z); }
+//void Quad::setPos(D3DXVECTOR3 Pos) { position = Pos; }

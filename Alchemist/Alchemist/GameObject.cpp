@@ -9,13 +9,13 @@ D3DXMATRIX *		GameObject::projMatrix =		NULL;
 short				GameObject::currentID =			0;
 
 GameObject::GameObject(void) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
-	velocity(0,0,0), acceleration(0,0,0),
+	velocity(0,0,0), acceleration(0,0,0), texture(NULL),
 	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 { }
 
 GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
-	velocity(0,0,0), acceleration(0,0,0),
+	velocity(0,0,0), acceleration(0,0,0), texture(NULL),
 	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 {
@@ -27,7 +27,7 @@ GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), hei
 }
 
 GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0),
-	velocity(0,0,0), acceleration(0,0,0),
+	velocity(0,0,0), acceleration(0,0,0), texture(NULL),
 	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
 {
@@ -45,9 +45,10 @@ GameObject::~GameObject()
 
 int GameObject::initGeom()
 {
-	if (quad.texture == NULL || quad.vertexBuffer == NULL)
-		quad.init(directory.c_str());
+	if (!quad.vertexLoaded()) quad.init();
 	
+	if (texture == NULL) assetManager->getTexture(directory.c_str(), &texture);
+
 	string s = directory;
 	s.pop_back();
 	s += "png";
@@ -166,7 +167,7 @@ int GameObject::update(long time)
 
 int GameObject::renderFrame(long time)
 {	
-	if (actorShader == 0)
+	if (actorShader == 0 || texture == NULL)
 		initGeom();
 	else
 	{
@@ -191,7 +192,7 @@ int GameObject::renderFrame(long time)
 		D3DXMATRIX trans = scale * rot * orient * *viewMatrix * *projMatrix;
 
 		actorShader->SetMatrix(hMatrix, &trans);
-		actorShader->SetTexture(hTexture, quad.texture);
+		actorShader->SetTexture(hTexture, texture);
 
 		actorShader->SetFloat(hNumSpriteCols, numSpriteCols);
 		actorShader->SetFloat(hNumSpriteRows, numSpriteRows);
@@ -216,7 +217,7 @@ int GameObject::renderFrame(long time)
 
 int GameObject::renderFrame(long time, D3DXMATRIX * trans)
 {
-	if (actorShader == 0)
+	if (actorShader == 0 || texture == NULL)
 		initGeom();
 	else
 	{
@@ -228,7 +229,7 @@ int GameObject::renderFrame(long time, D3DXMATRIX * trans)
 		D3DXMATRIX asdf = scale * *trans * camTrans * *viewMatrix * *projMatrix;
 
 		actorShader->SetMatrix(hMatrix, &asdf);
-		actorShader->SetTexture(hTexture, quad.texture);
+		actorShader->SetTexture(hTexture, texture);
 
 		actorShader->SetFloat(hNumSpriteCols, numSpriteCols);
 		actorShader->SetFloat(hNumSpriteRows, numSpriteRows);
@@ -256,11 +257,16 @@ D3DXVECTOR3 GameObject::getPosition() { return position; }
 void GameObject::modVelocity(D3DXVECTOR3 x) { velocity += x; }
 void GameObject::modVelocity(float x, float y, float z) { modVelocity(D3DXVECTOR3(x,y,z)); }
 
+float GameObject::getWidth() { return width; }
+float GameObject::getHeight() { return height; }
+float GameObject::getRotation() { return rotation; }
+
 #pragma region Set Functions
 void GameObject::setPosition(D3DXVECTOR3 pos) { position = pos*0.01f; }
 void GameObject::setPosition(float x, float y, float z) { position = D3DXVECTOR3(x*0.01f, y*0.01f, z); }
 void GameObject::setPositionY(float y) { position.y = y*0.01f; }
-void GameObject::setSize(int x, int y) { width = x*0.01f; height = y*0.01f; quad.setSize(width, height);}
+void GameObject::modPosition(D3DXVECTOR3 x) { position += x; }
+void GameObject::setSize(int x, int y) { width = x*0.01f; height = y*0.01f; } //quad.setSize(width, height);}
 void GameObject::setVelocity(D3DXVECTOR3 vel) { velocity = vel; }
 void GameObject::setVelocity(float x, float y, float z) { velocity = D3DXVECTOR3(x,y,z); }
 void GameObject::setAcceleration(D3DXVECTOR3 accel) { acceleration = accel; }
@@ -268,6 +274,8 @@ void GameObject::setAcceleration(float x, float y, float z) { acceleration = D3D
 void GameObject::setRotation(float x) { rotation = x; }
 void GameObject::modRotation(float x) { rotation += x; }
 void GameObject::setID(short x) { ID = x; }
+void GameObject::setCurRow(short x) { curSpriteRow = x; }
+void GameObject::setCurCol(short x) { curSpriteCol = x; }
 #pragma endregion
 
 #pragma region Set Statics

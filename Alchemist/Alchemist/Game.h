@@ -63,6 +63,7 @@
 #include "RigidObject.h"
 #include "Player.h"
 #include "Camera.h"
+#include "ProjectileManager.h"
 
 using std::cin;
 using std::cout;
@@ -132,7 +133,7 @@ private:
 	//Window Variables
 	HINSTANCE hInstance;
 	int fullScreen;
-	static int wndWidth, wndHeight;
+	static float wndWidth, wndHeight;
 	HWND hwnd;
 	char mGameName[TITLE_SIZE+1];
 	bool console;
@@ -187,7 +188,9 @@ private:
 	
 	list<GameObject *> gameObjects;
 	list<MenuWindow *> menuObjects;
-	GameObject * floor;
 
-	GameObject * player;
+	Player * player;
+	MenuWindow * crosshair;
+
+	ProjectileManager projectileManager;
 };

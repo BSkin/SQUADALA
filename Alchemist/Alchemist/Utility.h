@@ -38,4 +38,6 @@ public:
 	static std::string GetTheCurrentDirectory();
 	static D3DXMATRIX btTransToD3DXMat(btTransform*);
 	static btTransform D3DXMatTobtTrans(D3DXMATRIX*);
+	static D3DXVECTOR3 ConvertToD3D(const btVector3 *x);
+	static btVector3 ConvertToBt(const D3DXVECTOR3 *x);
 };

@@ -161,3 +161,6 @@ btTransform Utility::D3DXMatTobtTrans(D3DXMATRIX * worldMatrix)
 
 	return bulletTransformMatrix;
 }
+
+D3DXVECTOR3 Utility::ConvertToD3D(const btVector3 * vec) { return D3DXVECTOR3(vec->x(), vec->y(), vec->z()); }
+btVector3 Utility::ConvertToBt(const D3DXVECTOR3 * vec) { return btVector3(vec->x, vec->y, vec->z); }
