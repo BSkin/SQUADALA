@@ -17,7 +17,7 @@ public:
 	virtual int renderFrame(long time);
 
 	static int setInputManager(RawInputManager *);
-	static void setCursorPos(D3DXVECTOR2);
+	static void setCursorPos(double x, double y);
 
 private:
 	virtual int initGeom();
@@ -25,6 +25,7 @@ private:
 	BodyPart * torso, * head, * frontArms, * backArms, * crosshair;
 	float aimRotation;
 
-	static D3DXVECTOR2 cursorPos;
+	static double cursorX;
+	static double cursorY;
 	static RawInputManager * inputManager;
 };

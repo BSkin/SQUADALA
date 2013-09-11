@@ -37,6 +37,7 @@ public:
 	float getWidth();
 	float getHeight();
 	float getRotation();
+	const string getIndentifier();
 
 	void setPosition(D3DXVECTOR3);
 	virtual void setPosition(float x, float y, float z);
@@ -103,4 +104,5 @@ protected:
 	#pragma endregion
 
 	float offset;
+	string identifier;
 };

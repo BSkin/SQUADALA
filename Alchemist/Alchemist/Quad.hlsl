@@ -40,7 +40,9 @@ struct PixelData ShaderVS(VertexData vin)
 
 float4 ShaderPS(PixelData vin) : COLOR
 {
-	vin.col = tex2D(TexS, vin.tex0);
+	//vin.col = tex2D(TexS, vin.tex0);
+	vin.col = vin.tex0.y * sin(vin.tex0.x) * float4(1,0,0,1);
+	return float4(1,0,0,1);
 	return(vin.col);
 }
 

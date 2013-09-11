@@ -1,7 +1,8 @@
 #include "Player.h"
 
 RawInputManager *	Player::inputManager =	NULL;
-D3DXVECTOR2 		Player::cursorPos =		D3DXVECTOR2(0,0);
+double		 		Player::cursorX =		0.0;
+double				Player::cursorY =		0.0;
 
 Player::Player(void) : Character("Assets\\Player\\Leg Sprites.png"), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL)
 {
@@ -46,21 +47,24 @@ int Player::update(long time)
 
 	if (inputManager->getMouseKeyPress(0))
 	{
-		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png");
-		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*100, 
-							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*100, 
-							position.z);//frontArms->getPosition()*100);
-		bullet->setSize(55, 5);
+		float bulletDist = height*42.5+25;
+		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png", this);
+		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*bulletDist, 
+							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*bulletDist, 
+							position.z);
+		bullet->setMass(0.1);
+		bullet->setSize(50, 5);
 		bullet->setRotation(frontArms->getRotation());
 		bullet->setSpeed(30);
 		projectileManager->addObject(bullet);
 	}
-	if (inputManager->getMouseKeyDown(1))
+	if (inputManager->getMouseKeyDown(1) && time % 2 > 0)
 	{
-		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png");
+		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png", this);
 		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*100, 
 							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*100, 
-							position.z);//frontArms->getPosition()*100);
+							position.z);
+		bullet->setMass(0.1);
 		bullet->setSize(55, 5);
 		bullet->setRotation(frontArms->getRotation());
 		bullet->setSpeed(30);
@@ -105,17 +109,17 @@ int Player::update(long time)
 
 int Player::renderFrame(long time)
 {
-	flipSprite = (cursorPos.x+camera->getPosition().x-position.x) < 0;
+	flipSprite = (cursorX+camera->getPosition().x-position.x) < 0;
 	Character::renderFrame(time);
 	
 	torso->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.2);
 	head->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.3);
 	frontArms->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.4);
 	backArms->setPosition(renderPosition.x*100, renderPosition.y*100, renderPosition.z - 0.1);
-	crosshair->setPosition(cursorPos.x*100, cursorPos.y*100, renderPosition.z - 0.5);
+	crosshair->setPosition(cursorX*100, cursorY*100, renderPosition.z - 0.5);
 	
-	aimRotation = atan2(cursorPos.y + camera->getPosition().y - position.y,
-						cursorPos.x + camera->getPosition().x - position.x);
+	aimRotation = atan2(cursorY + camera->getPosition().y - position.y,
+						cursorX + camera->getPosition().x - position.x);
 
 	if (flipSprite) aimRotation += 3.14159f;
 	if (aimRotation > 3.14159) aimRotation -= 3.14159*2.0;
@@ -131,8 +135,8 @@ int Player::renderFrame(long time)
 
 	backArms->setPosition(frontArms->getPosition().x*100, frontArms->getPosition().y*100, renderPosition.z - 0.1);
 	
-	frontArms->setRotation(atan2(	cursorPos.y - frontArms->getPosition().y,
-									cursorPos.x - frontArms->getPosition().x));
+	frontArms->setRotation(atan2(	cursorY - frontArms->getPosition().y,
+									cursorX - frontArms->getPosition().x));
 	if (flipSprite) frontArms->modRotation(3.14159f);
 	if (frontArms->getRotation() > 3.14159) frontArms->modRotation(-3.14159*2.0); 
 	
@@ -162,4 +166,4 @@ int Player::setInputManager(RawInputManager * iManager)
 	return -1;
 }
 
-void Player::setCursorPos(D3DXVECTOR2 p) { cursorPos = p;}
+void Player::setCursorPos(double x, double y) { cursorX = x; cursorY = y;}

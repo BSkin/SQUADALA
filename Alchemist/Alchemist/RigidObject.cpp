@@ -2,6 +2,7 @@
 
 btAlignedObjectArray<btCollisionShape*> *	RigidObject::collisionShapes =	NULL;
 btDiscreteDynamicsWorld *					RigidObject::dynamicsWorld =	NULL;
+list<RigidObject *> *						RigidObject::physObjects =		NULL;
 
 RigidObject::RigidObject() : GameObject(), mass(1.0f), speed(0), physInit(false)
 {}
@@ -13,7 +14,18 @@ RigidObject::RigidObject(short ID) : GameObject(ID), mass(1.0f), speed(0), physI
 {}
 
 RigidObject::~RigidObject()
-{}
+{
+	if (body) dynamicsWorld->removeRigidBody(body);
+	if (colShape) collisionShapes->remove(colShape);
+	physObjects->remove(this);
+
+	if (body && body->getMotionState())
+	{
+		delete body->getMotionState();
+	}
+	delete body;
+	body = 0;
+}
 
 int RigidObject::initGeom()
 {
@@ -58,6 +70,7 @@ int RigidObject::initBullet()
 	body->setFriction(0.5f);
 
 	dynamicsWorld->addRigidBody(body);
+	physObjects->push_front(this);
 	
 	body->activate(true);
 	body->setLinearVelocity(btVector3(cos(rotation) * speed, -sin(rotation) * speed, 0));
@@ -91,8 +104,17 @@ int RigidObject::renderFrame(long time)
 	return 0;
 }
 
-void RigidObject::setBullet(btAlignedObjectArray<btCollisionShape*> * col, btDiscreteDynamicsWorld * world)
+int RigidObject::collide(RigidObject * other)
+{
+
+	return 0;
+}
+
+const btCollisionObject * RigidObject::getBody() { return body; }
+
+void RigidObject::setStatics(btAlignedObjectArray<btCollisionShape*> * col, btDiscreteDynamicsWorld * world, list<RigidObject *> * p)
 {
 	collisionShapes = col;
 	dynamicsWorld = world;
+	physObjects = p;
 }

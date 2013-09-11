@@ -1,8 +1,8 @@
 #include "Game.h"
 
 #pragma region Game Constants
-#define WND_WIDTH 1920
-#define WND_HEIGHT 1200
+#define WND_WIDTH 1280
+#define WND_HEIGHT 800
 #define FRAMES_PER_SECOND 60
 
 #define START_MENU	0
@@ -83,7 +83,7 @@ LRESULT Game::globalWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 Game::Game(HINSTANCE hInst, char* gameName) : countsPerSecond(0.0), CounterStart(0), frameCount(0), fps(0), frameTimeOld(0), frameTime(0.0), 
-												menuObjects(), gameObjects(), player(0), sunDir(1,-1,0), screenEffect(0),
+												menuObjects(), gameObjects(), physObjects(), player(0), sunDir(1,-1,0), screenEffect(0),
 												renderSurface(NULL), backBuffer(NULL)
 { 
 	fullScreen = false;
@@ -373,7 +373,7 @@ int Game::init(void)
 	GameObject::setd3dDev(d3dDev);
 	GameObject::setAssetManager(assetManager);
 	GameObject::setCamera(&camera);
-	RigidObject::setBullet(&collisionShapes, dynamicsWorld);
+	RigidObject::setStatics(&collisionShapes, dynamicsWorld, &physObjects);
 	Player::setInputManager(inputManager);
 	Character::setProjectileManager(&projectileManager);
 	Model::setd3dDev(d3dDev);
@@ -527,7 +527,33 @@ int Game::update(long time)
 	{
 		//SetCursorPos(wndWidth/2, wndHeight/2);
 
+		#pragma region Update Bullet
 		dynamicsWorld->stepSimulation(1.f/60.f,1);
+
+		//Assume world->stepSimulation or world->performDiscreteCollisionDetection has been called
+ 
+		int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+		for (int i=0;i<numManifolds;i++)
+		{
+			btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			const btCollisionObject* obA = static_cast<const btCollisionObject*>(contactManifold->getBody0());
+			const btCollisionObject* obB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
+ 
+			int numContacts = contactManifold->getNumContacts();
+			for (int j=0;j<numContacts;j++)
+			{
+				btManifoldPoint& pt = contactManifold->getContactPoint(j);
+				if (pt.getDistance()<0.f)
+				{
+					RigidObject * physA = getRigidObject(obA);
+					RigidObject * physB = getRigidObject(obB);
+
+					physA->collide(physB);
+					physB->collide(physA);
+				}
+			}
+		}
+		#pragma endregion
 		
 		if (inputManager->keyPress(VK_ESCAPE)) 
 		{
@@ -567,8 +593,25 @@ int Game::update(long time)
 		//================= FIX PACKET FIRST =================
 		//====================================================
 
-		D3DXVECTOR2 p = inputManager->getMousePos() * 0.01;
-		player->setCursorPos(p);
+		D3DXVECTOR2 p = inputManager->getMousePos();
+
+		string px = std::to_string((int)p.x);
+		string py = std::to_string((int)p.y);
+		if (p.x < 0) px = px.substr(1, px.length());
+		if (p.y < 0) py = py.substr(1, py.length());
+		if (px.length() < 3) px = "0" + px;
+		if (px.length() < 3) px = "0" + px;
+		if (py.length() < 3) py = "0" + py;
+		if (py.length() < 3) py = "0" + py;
+		px = px.insert(px.length()-2, ".");
+		py = py.insert(py.length()-2, ".");
+		if (p.x < 0) px = px.insert(0, "-");
+		if (p.y < 0) py = py.insert(0, "-");
+
+		double dx = stod(px);
+		double dy = stod(py);
+
+		player->setCursorPos(dx, dy);
 		//crosshair->setPosition(cp.x, cp.y);
 
 		list<GameObject *>::iterator iter;
@@ -734,6 +777,7 @@ int Game::renderFrame(long time)
 	s += std::to_string(fps);
 	s += "\nActive: ";
 	s += activeWindow ? "true" : "false";
+	s += "\nNumber of Bullets: " + std::to_string(projectileManager.getSize());
 
 	font->DrawTextA(NULL, s.c_str(), -1, &tr, DT_TOP | DT_LEFT, D3DCOLOR_ARGB(255,255,0,0));
 	#pragma endregion
@@ -828,7 +872,7 @@ int Game::cleanBullet()
 	}
 
 	collisionShapes.clear();
-
+	
 	return 0;
 }
 
@@ -837,7 +881,6 @@ void Game::changeState(int targetState)
 	if (gameState == targetState) return;
 
 	#pragma region Pre Change Cleanup
-	cleanBullet();
 
 	list<GameObject *>::iterator iter;
 	for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
@@ -861,6 +904,8 @@ void Game::changeState(int targetState)
 
 	projectileManager.clearList();
 
+	cleanBullet();
+
 	camera.setPosition(0,0,0);
 
 	#pragma endregion
@@ -869,7 +914,7 @@ void Game::changeState(int targetState)
 	{
 		ShowCursor(true);
 
-		MenuWindow * title = new MenuWindow("Assets\\TitleTemp.png");
+		MenuWindow * title = new MenuWindow("Assets\\reds.png");
 		title->setPosition(0,0,MID);
 		title->setSize(wndWidth, wndHeight);
 		menuObjects.push_front(title);
@@ -881,8 +926,8 @@ void Game::changeState(int targetState)
 		//initGround();
 		
 		player = new Player();
-		player->setPosition(-100,650,1);
-		player->setSize(150, 150);
+		player->setPosition(0,650,1);
+		player->setSize(100, 100);
 		GameObject * p = player;
 		gameObjects.push_front(p);
 
@@ -959,6 +1004,16 @@ int Game::resizeWindow(int width, int height)
 	//d3dDev->Reset(md3dpp);
 
 	return 0;
+}
+
+RigidObject * Game::getRigidObject(const btCollisionObject * b)
+{
+	list<RigidObject *>::iterator iter;
+	for (iter = physObjects.begin(); iter != physObjects.end(); iter++)
+	{
+		if ((*iter)->getBody() == b) 
+			return (*iter);
+	}
 }
 
 #pragma region Framerate Functions

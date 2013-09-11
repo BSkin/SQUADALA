@@ -107,6 +107,8 @@ private:
 
 	int setd3dDev(IDirect3DDevice9 *d3dDev);
 	
+	RigidObject * getRigidObject(const btCollisionObject *);
+
 	void changeState(int targetState);
 	short gameState;
 
@@ -187,6 +189,7 @@ private:
 	int loadScreenEffect(void);
 	
 	list<GameObject *> gameObjects;
+	list<RigidObject *> physObjects;
 	list<MenuWindow *> menuObjects;
 
 	Player * player;

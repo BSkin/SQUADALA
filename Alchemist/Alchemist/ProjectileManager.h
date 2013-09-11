@@ -13,6 +13,10 @@ public:
 	void clearList();
 	int render(long time);
 
+	list<RigidObject *> * getPhysList();
+	int getSize();
+
 private:
 	list<RigidObject *> physList;
+	list<RigidObject *> deadList;
 };
