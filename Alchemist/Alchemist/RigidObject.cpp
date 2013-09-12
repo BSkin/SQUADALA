@@ -4,13 +4,13 @@ btAlignedObjectArray<btCollisionShape*> *	RigidObject::collisionShapes =	NULL;
 btDiscreteDynamicsWorld *					RigidObject::dynamicsWorld =	NULL;
 list<RigidObject *> *						RigidObject::physObjects =		NULL;
 
-RigidObject::RigidObject() : GameObject(), mass(1.0f), speed(0), physInit(false)
+RigidObject::RigidObject() : GameObject(), mass(1.0f), speed(0), gravity(-9.8), physInit(false)
 {}
 
-RigidObject::RigidObject(char *fileBase) : GameObject(fileBase), mass(1.0f), speed(0), physInit(false)
+RigidObject::RigidObject(char *fileBase) : GameObject(fileBase), mass(1.0f), speed(0), gravity(-9.8), physInit(false)
 {}
 
-RigidObject::RigidObject(short ID) : GameObject(ID), mass(1.0f), speed(0), physInit(false)
+RigidObject::RigidObject(short ID) : GameObject(ID), mass(1.0f), speed(0), gravity(-9.8), physInit(false)
 {}
 
 RigidObject::~RigidObject()
@@ -34,7 +34,7 @@ int RigidObject::initGeom()
 
 int RigidObject::initBullet()
 {
-	colShape = new btBoxShape(btVector3(width*0.5,height*0.5, 0.5));
+	colShape = new btBoxShape(btVector3(width*0.5,height*0.5, 10));
 	//colShape = new btSphereShape(btScalar(0.1));
 
 	collisionShapes->push_back(colShape);
@@ -47,7 +47,7 @@ int RigidObject::initBullet()
 	startTransform.setOrigin(btVector3(
 					btScalar(position.x),
 					btScalar(position.y),
-					btScalar(0.1)));
+					btScalar(position.z)));
 
 	startTransform.setRotation(btQuaternion(btVector3(0,1,0), 3.14159265358979323846264338327950288419716939));
 	startTransform.setRotation(btQuaternion(3.14159265358979323846264338327950288419716939, 0, rotation));
@@ -68,10 +68,12 @@ int RigidObject::initBullet()
 	body->setLinearFactor(btVector3(1,1,0));
 	body->setAngularFactor(btVector3(0,0,1));
 	body->setFriction(0.5f);
+	if (identifier == "Bullet") body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
 	physObjects->push_front(this);
 	
+	body->setGravity(btVector3(0, gravity, 0));
 	body->activate(true);
 	body->setLinearVelocity(btVector3(cos(rotation) * speed, -sin(rotation) * speed, 0));
 
@@ -82,6 +84,7 @@ int RigidObject::initBullet()
 
 void RigidObject::setMass(float x) { mass = x; }
 void RigidObject::setSpeed(float x) { speed = x; }
+void RigidObject::setGravity(float x) { gravity = x; }
 
 int RigidObject::update(long time)
 {
@@ -104,9 +107,18 @@ int RigidObject::renderFrame(long time)
 	return 0;
 }
 
-int RigidObject::collide(RigidObject * other)
+int RigidObject::collide(RigidObject * other, const btVector3 * worldPos)
 {
 
+	return 0;
+}
+
+int RigidObject::applyForce(const btVector3 * vel, float m, const btVector3 * worldPos)
+{
+	btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
+	btVector3 force = *vel*m*5;
+	body->activate(true);
+	body->applyForce(force, localForce);
 	return 0;
 }
 

@@ -529,6 +529,7 @@ int Game::update(long time)
 
 		#pragma region Update Bullet
 		dynamicsWorld->stepSimulation(1.f/60.f,1);
+		dynamicsWorld->clearForces();
 
 		//Assume world->stepSimulation or world->performDiscreteCollisionDetection has been called
  
@@ -548,8 +549,8 @@ int Game::update(long time)
 					RigidObject * physA = getRigidObject(obA);
 					RigidObject * physB = getRigidObject(obB);
 
-					physA->collide(physB);
-					physB->collide(physA);
+					physA->collide(physB, &pt.getPositionWorldOnB());
+					physB->collide(physA, &pt.getPositionWorldOnA());
 				}
 			}
 		}
@@ -912,7 +913,7 @@ void Game::changeState(int targetState)
 
 	if (targetState == START_MENU)
 	{
-		ShowCursor(true);
+		//ShowCursor(true);
 
 		MenuWindow * title = new MenuWindow("Assets\\reds.png");
 		title->setPosition(0,0,MID);
@@ -926,7 +927,7 @@ void Game::changeState(int targetState)
 		//initGround();
 		
 		player = new Player();
-		player->setPosition(0,650,1);
+		player->setPosition(0,650,0);
 		player->setSize(100, 100);
 		GameObject * p = player;
 		gameObjects.push_front(p);
@@ -943,7 +944,7 @@ void Game::changeState(int targetState)
 			y = rand() % 100;
 			x *= 0.01;
 			y *= 0.01;
-			temp->setPosition(x*maxDist*2 - maxDist, 500+y*maxDist*2 - maxDist, 1);
+			temp->setPosition(x*maxDist*2 - maxDist, 500+y*maxDist*2 - maxDist, 0);
 			
 			x = rand() % 100;
 			y = rand() % 100;

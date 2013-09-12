@@ -16,10 +16,14 @@ int Bullet::update(long time)
 	return 0;
 }
 
-int Bullet::collide(RigidObject * other)
+int Bullet::collide(RigidObject * other, const btVector3 * worldCollPos)
 {
 	if (other != owner && other->getIndentifier() != "Bullet") 
+	{
 		dead = true;
+		other->applyForce(&body->getLinearVelocity(), mass, worldCollPos);
+	}
+		
 	return 0;
 }
 

@@ -15,6 +15,7 @@ public:
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
+	virtual int collide(RigidObject *, const btVector3 * worldCollPos);
 
 	static int setInputManager(RawInputManager *);
 	static void setCursorPos(double x, double y);
@@ -24,6 +25,7 @@ private:
 
 	BodyPart * torso, * head, * frontArms, * backArms, * crosshair;
 	float aimRotation;
+	bool onGround;
 
 	static double cursorX;
 	static double cursorY;

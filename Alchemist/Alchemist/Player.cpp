@@ -4,7 +4,7 @@ RawInputManager *	Player::inputManager =	NULL;
 double		 		Player::cursorX =		0.0;
 double				Player::cursorY =		0.0;
 
-Player::Player(void) : Character("Assets\\Player\\Leg Sprites.png"), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL)
+Player::Player(void) : Character("Assets\\Player\\Leg Sprites.png"), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL), onGround(true)
 {
 	directory = "Assets\\Player\\Leg Sprites.png";
 }
@@ -40,6 +40,13 @@ int Player::update(long time)
 {
 	direction = D3DXVECTOR3(0,0,0);	
 
+	frontArms->setPosition(position.x*100, position.y*100, renderPosition.z - 0.4);
+	frontArms->modPosition(D3DXVECTOR3(	-cos(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425,
+										sin(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425, 0));
+
+	if (flipSprite) frontArms->modRotation(-3.14159);
+	if (frontArms->getRotation() < 3.14159) frontArms->modRotation(3.14159*2.0); 
+
 	if (inputManager->keyDown('W')) moveUp();
 	if (inputManager->keyDown('S')) moveDown();
 	if (inputManager->keyDown('D')) moveRight();
@@ -47,27 +54,36 @@ int Player::update(long time)
 
 	if (inputManager->getMouseKeyPress(0))
 	{
-		float bulletDist = height*42.5+25;
-		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png", this);
-		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*bulletDist, 
-							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*bulletDist, 
-							position.z);
-		bullet->setMass(0.1);
-		bullet->setSize(50, 5);
-		bullet->setRotation(frontArms->getRotation());
-		bullet->setSpeed(30);
-		projectileManager->addObject(bullet);
+		float r;
+		for (int x = 0; x < 10; x++)
+		{
+			r = rand() % 100;
+			r *= 0.005;
+			r -= 0.25;
+			float bulletDist = frontArms->getWidth()*0.5+50;
+			RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png", this);
+			bullet->setPosition(frontArms->getPosition().x*100.0 + cos(frontArms->getRotation())*bulletDist, 
+								frontArms->getPosition().y*100.0 - sin(frontArms->getRotation())*bulletDist, 
+								-1);
+			bullet->setMass(0.1);
+			bullet->setSize(100, 5);
+			bullet->setRotation(frontArms->getRotation() + r);
+			bullet->setSpeed(20);
+			projectileManager->addObject(bullet);
+		}
 	}
-	if (inputManager->getMouseKeyDown(1) && time % 2 > 0)
+	if (inputManager->getMouseKeyDown(1))
 	{
+		float bulletDist = frontArms->getWidth()*0.5+50;
 		RigidObject * bullet = new Bullet("Assets\\Player\\Bullet.png", this);
-		bullet->setPosition(frontArms->getPosition().x*100 + cos(frontArms->getRotation())*100, 
-							frontArms->getPosition().y*100 - sin(frontArms->getRotation())*100, 
-							position.z);
+		bullet->setPosition(frontArms->getPosition().x*100.0,// + cos(frontArms->getRotation())*bulletDist, 
+							frontArms->getPosition().y*100.0,// - sin(frontArms->getRotation())*bulletDist, 
+							-1);
 		bullet->setMass(0.1);
-		bullet->setSize(55, 5);
+		bullet->setSize(100, 5);
 		bullet->setRotation(frontArms->getRotation());
-		bullet->setSpeed(30);
+		bullet->setSpeed(20);
+		bullet->setGravity(0);
 		projectileManager->addObject(bullet);
 	}
 
@@ -82,9 +98,7 @@ int Player::update(long time)
 		backArms->setCurCol(1);
 	}
 
-	if (abs(body->getLinearVelocity().y()) > 0.5) 
-		{ curSpriteRow = 2; curSpriteCol = 0; }
-	else
+	if (onGround && abs(body->getLinearVelocity().y()) < 0.5) 
 	{
 		if (direction.x) 
 		{ 
@@ -95,9 +109,15 @@ int Player::update(long time)
 		else 
 			{ curSpriteRow = 1; curSpriteCol = 0; }
 	}
+	else
+		{ curSpriteRow = 2; curSpriteCol = 0; }
 
 	velocity.x = speed*0.01 * direction.x;
-	if (inputManager->keyPress(VK_SPACE)) body->setLinearVelocity(body->getLinearVelocity() + btVector3(0,5,0));
+	if (inputManager->keyPress(VK_SPACE)) 
+	{
+		body->setLinearVelocity(body->getLinearVelocity() + btVector3(0,5,0));
+		onGround = false;
+	}
 
 	body->translate(btVector3(velocity.x, velocity.y, velocity.z));
 	body->setAngularVelocity(btVector3(0,0,0));
@@ -137,6 +157,7 @@ int Player::renderFrame(long time)
 	
 	frontArms->setRotation(atan2(	cursorY - frontArms->getPosition().y,
 									cursorX - frontArms->getPosition().x));
+
 	if (flipSprite) frontArms->modRotation(3.14159f);
 	if (frontArms->getRotation() > 3.14159) frontArms->modRotation(-3.14159*2.0); 
 	
@@ -145,13 +166,6 @@ int Player::renderFrame(long time)
 	head->render(		head->getPosition(),		-head->getRotation(),		flipSprite, time);
 	frontArms->render(	frontArms->getPosition(),	-frontArms->getRotation(),	flipSprite, time);
 	crosshair->render(	crosshair->getPosition(),	0.0,						false,		time);
-
-	frontArms->setPosition(position.x*100, position.y*100, renderPosition.z - 0.4);
-	frontArms->modPosition(D3DXVECTOR3(	cos(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425,
-										sin(torso->getRotation()+3.14159*0.5) * torso->getHeight() * 0.425, 0));
-
-	if (flipSprite) frontArms->modRotation(-3.14159);
-	if (frontArms->getRotation() < 3.14159) frontArms->modRotation(3.14159*2.0); 
 
 	return 0;
 }
@@ -167,3 +181,9 @@ int Player::setInputManager(RawInputManager * iManager)
 }
 
 void Player::setCursorPos(double x, double y) { cursorX = x; cursorY = y;}
+
+int Player::collide(RigidObject * obj, const btVector3 * worldPos)
+{
+	if (obj->getIndentifier() != "Bullet") onGround = true;
+	return 0;
+}
