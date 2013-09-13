@@ -8,7 +8,7 @@ void ProjectileManager::addObject(RigidObject * r)
 	physList.push_front(r);
 }
 
-int ProjectileManager::render(long time)
+int ProjectileManager::update(long time)
 {
 	list<RigidObject *>::iterator iter;
 	for (iter = physList.begin(); iter != physList.end(); iter++)
@@ -27,7 +27,12 @@ int ProjectileManager::render(long time)
 	}
 	deadList.clear();
 
+	return 0;
+}
 
+int ProjectileManager::render(long time)
+{
+	list<RigidObject *>::iterator iter;
 	for (iter = physList.begin(); iter != physList.end(); iter++)
 	{
 		(*iter)->renderFrame(time);

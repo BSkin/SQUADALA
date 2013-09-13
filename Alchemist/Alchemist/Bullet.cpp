@@ -1,9 +1,10 @@
 #include "Bullet.h"
 
-Bullet::Bullet(char *fileBase, RigidObject * o) : RigidObject(fileBase), dead(false)
+Bullet::Bullet(char *fileBase, RigidObject * o, long time) : RigidObject(fileBase), dead(false), lifeSpan(60)
 {
 	owner = o;
 	identifier = "Bullet";
+	initTime = time;
 }
 
 Bullet::~Bullet()
@@ -12,7 +13,7 @@ Bullet::~Bullet()
 
 int Bullet::update(long time)
 {
-	if (dead) return -1;
+	if (dead || (time - initTime) > lifeSpan) return -1;
 	return 0;
 }
 

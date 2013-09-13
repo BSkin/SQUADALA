@@ -6,6 +6,10 @@
 #include "MenuWindow.h"
 #include "RawInputManager.h"
 
+#define WEP_HANDGUN 0
+#define WEP_RIFLE	1
+#define WEP_SHOTGUN	2
+
 class Player : public Character
 {
 public:
@@ -26,6 +30,7 @@ private:
 	BodyPart * torso, * head, * frontArms, * backArms, * crosshair;
 	float aimRotation;
 	bool onGround;
+	short weapon;
 
 	static double cursorX;
 	static double cursorY;

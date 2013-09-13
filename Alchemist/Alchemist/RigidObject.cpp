@@ -115,11 +115,23 @@ int RigidObject::collide(RigidObject * other, const btVector3 * worldPos)
 
 int RigidObject::applyForce(const btVector3 * vel, float m, const btVector3 * worldPos)
 {
+	{
+		btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
+		btVector3 force = *vel*m*5;
+
+		body->applyCentralForce(force);
+        btTransform rotate_with_body;
+        rotate_with_body.setIdentity();
+        rotate_with_body.setRotation( body->getCenterOfMassTransform().getRotation() );
+        body->applyTorque(rotate_with_body(localForce).cross(force)*body->getAngularFactor());
+		body->clearForces();
+		return 0;
+	}/*
 	btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
 	btVector3 force = *vel*m*5;
 	body->activate(true);
 	body->applyForce(force, localForce);
-	return 0;
+	return 0;*/
 }
 
 const btCollisionObject * RigidObject::getBody() { return body; }

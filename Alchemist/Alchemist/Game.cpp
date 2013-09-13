@@ -2,7 +2,7 @@
 
 #pragma region Game Constants
 #define WND_WIDTH 1280
-#define WND_HEIGHT 800
+#define WND_HEIGHT 720
 #define FRAMES_PER_SECOND 60
 
 #define START_MENU	0
@@ -619,6 +619,8 @@ int Game::update(long time)
 		for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
 			(*iter)->update(time);
 
+		projectileManager.update(time);
+
 		//player->setPosition(0, 10, 0);
 		//camera.setPosition(player->getPosition());	
 	}
@@ -643,7 +645,7 @@ int Game::renderFrame(long time)
 	#pragma region Render to Screen Texture
 	d3dDev->SetRenderTarget(0, renderSurface);
 	//d3dDev->SetDepthStencilSurface(screenStencil);
-	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(150, 150, 100), 1.0f, 0);
+	d3dDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(105, 143, 161), 1.0f, 0);
 	d3dDev->BeginScene();
 
 	list<GameObject *>::iterator iter;
@@ -959,7 +961,7 @@ void Game::changeState(int targetState)
 
 		RigidObject * ground = new RigidObject("Assets\\terr.png");
 		ground->setMass(0);
-		ground->setSize(1000,300);
+		ground->setSize(1300,300);
 		ground->setPosition(0, -150, 0);
 		GameObject * groundObj = ground;
 		gameObjects.push_front(groundObj);

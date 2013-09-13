@@ -5,7 +5,7 @@
 class Bullet : public RigidObject
 {
 public:
-		Bullet(char *fileBase, RigidObject * owner);
+		Bullet(char *fileBase, RigidObject * owner, long time);
 		~Bullet();
 		virtual int update(long time);
 		virtual int collide(RigidObject *, const btVector3 * worldCollPos);
@@ -14,4 +14,6 @@ public:
 private:
 	RigidObject * owner;
 	bool dead;
+	long initTime;
+	long lifeSpan;
 };
