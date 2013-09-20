@@ -171,6 +171,9 @@
     <ClInclude Include="Bullet.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClInclude>
+    <ClInclude Include="GrappleHook.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Alchemist.cpp">
@@ -240,6 +243,9 @@
       <Filter>Source Files\Engine Components\Particle System</Filter>
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GrappleHook.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClCompile>
   </ItemGroup>

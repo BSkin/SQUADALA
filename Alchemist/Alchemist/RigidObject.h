@@ -16,6 +16,8 @@ public:
 	virtual int applyForce(const btVector3 * velocity, float mass, const btVector3 * worldPos);
 
 	const btCollisionObject * getBody();
+	//virtual D3DXVECTOR3 getPosition();
+
 	void setMass(float x);
 	void setSpeed(float x);
 	void setGravity(float x);

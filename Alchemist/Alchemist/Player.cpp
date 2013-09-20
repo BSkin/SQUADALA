@@ -4,12 +4,13 @@ RawInputManager *	Player::inputManager =	NULL;
 double		 		Player::cursorX =		0.0;
 double				Player::cursorY =		0.0;
 
-Player::Player(void) : Character("Assets\\Player\\Leg Sprites.png"), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL), onGround(true), weapon(WEP_HANDGUN)
+Player::Player(void) : Character("Assets\\Player\\Leg Sprites.png"), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL), onGround(true), 
+							weapon(WEP_HANDGUN), hook(this)
 {
 	directory = "Assets\\Player\\Leg Sprites.png";
 }
 
-Player::Player(short ID) : Character(ID), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL)
+Player::Player(short ID) : Character(ID), torso(NULL), head(NULL), frontArms(NULL), backArms(NULL), crosshair(NULL), hook(this)
 {
 	
 }
@@ -130,6 +131,11 @@ int Player::update(long time)
 		}	
 	}
 
+	if (inputManager->keyPress('F'))
+	{
+		hook.shoot(frontArms->getPosition(), frontArms->getRotation());
+	}
+
 	if (onGround && abs(body->getLinearVelocity().y()) < 0.5) 
 	{
 		if (direction.x) 
@@ -155,6 +161,8 @@ int Player::update(long time)
 	body->setAngularVelocity(btVector3(0,0,0));
 	body->setAngularFactor(0);
 	body->activate(true);
+
+	hook.update(time);
 
 	return Character::update(time);
 }
@@ -198,6 +206,8 @@ int Player::renderFrame(long time)
 	head->render(		head->getPosition(),		-head->getRotation(),		flipSprite, time);
 	frontArms->render(	frontArms->getPosition(),	-frontArms->getRotation(),	flipSprite, time);
 	crosshair->render(	crosshair->getPosition(),	0.0,						false,		time);
+
+	hook.renderFrame(time);
 
 	return 0;
 }

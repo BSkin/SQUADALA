@@ -68,7 +68,7 @@ int RigidObject::initBullet()
 	body->setLinearFactor(btVector3(1,1,0));
 	body->setAngularFactor(btVector3(0,0,1));
 	body->setFriction(0.5f);
-	if (identifier == "Bullet") body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	if (identifier == "Bullet" || identifier == "Hook") body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
 	physObjects->push_front(this);
@@ -115,7 +115,7 @@ int RigidObject::collide(RigidObject * other, const btVector3 * worldPos)
 
 int RigidObject::applyForce(const btVector3 * vel, float m, const btVector3 * worldPos)
 {
-	{
+	/*{
 		btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
 		btVector3 force = *vel*m*5;
 
@@ -126,12 +126,12 @@ int RigidObject::applyForce(const btVector3 * vel, float m, const btVector3 * wo
         body->applyTorque(rotate_with_body(localForce).cross(force)*body->getAngularFactor());
 		body->clearForces();
 		return 0;
-	}/*
+	}*/
 	btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
 	btVector3 force = *vel*m*5;
 	body->activate(true);
 	body->applyForce(force, localForce);
-	return 0;*/
+	return 0;
 }
 
 const btCollisionObject * RigidObject::getBody() { return body; }

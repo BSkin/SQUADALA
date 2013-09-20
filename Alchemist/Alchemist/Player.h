@@ -2,6 +2,7 @@
 
 #include "Character.h"
 #include "Bullet.h"
+#include "GrappleHook.h"
 #include "BodyPart.h"
 #include "MenuWindow.h"
 #include "RawInputManager.h"
@@ -31,6 +32,8 @@ private:
 	float aimRotation;
 	bool onGround;
 	short weapon;
+	
+	GrappleHook hook;
 
 	static double cursorX;
 	static double cursorY;

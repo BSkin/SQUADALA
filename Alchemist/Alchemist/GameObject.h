@@ -29,7 +29,7 @@ public:
 	static void setProjMatrix(D3DXMATRIX*);
 	static void setMatrices(D3DXMATRIX*, D3DXMATRIX*);
 
-	D3DXVECTOR3 getPosition();
+	virtual D3DXVECTOR3 getPosition();
 
 	void modVelocity(float, float, float);
 	void modVelocity(D3DXVECTOR3);
