@@ -21,6 +21,7 @@ public:
 	virtual int update(long time);
 	virtual int renderFrame(long time);
 	virtual int collide(RigidObject *, const btVector3 * worldCollPos);
+	virtual int initBullet();
 
 	static int setInputManager(RawInputManager *);
 	static void setCursorPos(double x, double y);

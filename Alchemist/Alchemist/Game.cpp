@@ -929,7 +929,7 @@ void Game::changeState(int targetState)
 		//initGround();
 		
 		player = new Player();
-		player->setPosition(0,650,0);
+		player->setPosition(0,0,0);
 		player->setSize(100, 100);
 		GameObject * p = player;
 		gameObjects.push_front(p);

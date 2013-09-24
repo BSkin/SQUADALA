@@ -21,6 +21,7 @@ public:
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
+	virtual int initBullet();
 
 	virtual int collide(RigidObject * other, const btVector3 * worldPos);
 

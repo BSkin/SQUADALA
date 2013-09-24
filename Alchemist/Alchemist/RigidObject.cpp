@@ -15,16 +15,42 @@ RigidObject::RigidObject(short ID) : GameObject(ID), mass(1.0f), speed(0), gravi
 
 RigidObject::~RigidObject()
 {
-	if (body) dynamicsWorld->removeRigidBody(body);
-	if (colShape) collisionShapes->remove(colShape);
+	//if (myMotionState) delete myMotionState;
+	//myMotionState = 0;
+	{
+		//dynamicsWorld->removeCollisionObject( obj );
+		dynamicsWorld->removeRigidBody( body ); 
+		//delete myMotionState;
+		//delete body;
+
+		collisionShapes->remove(colShape);
+		delete colShape;
+	}
 	physObjects->remove(this);
 
-	if (body && body->getMotionState())
+
+	/*if (body && body->getMotionState())
 	{
 		delete body->getMotionState();
 	}
-	delete body;
-	body = 0;
+
+	if (body) 
+	{
+		btCollisionObject * obj = body;
+		dynamicsWorld->removeCollisionObject(obj);
+		dynamicsWorld->removeRigidBody(body);
+		delete obj;
+		obj = 0;
+	}
+	//delete body;
+	//body = 0;
+
+	if (colShape) 
+	{
+			collisionShapes->remove(colShape);
+			delete colShape;
+			colShape = 0;
+	}*/
 }
 
 int RigidObject::initGeom()
@@ -60,7 +86,7 @@ int RigidObject::initBullet()
 		colShape->calculateLocalInertia(mass,localInertia);
 		
 
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+	myMotionState = new btDefaultMotionState(startTransform);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
 	body = new btRigidBody(rbInfo);
 
@@ -68,16 +94,16 @@ int RigidObject::initBullet()
 	body->setLinearFactor(btVector3(1,1,0));
 	body->setAngularFactor(btVector3(0,0,1));
 	body->setFriction(0.5f);
-	if (identifier == "Bullet" || identifier == "Hook") body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	//body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
 	physObjects->push_front(this);
 	
-	body->setGravity(btVector3(0, gravity, 0));
+	body->setGravity(btVector3(0, gravity/4, 0));
 	body->activate(true);
 	body->setLinearVelocity(btVector3(cos(rotation) * speed, -sin(rotation) * speed, 0));
 
-	//body->setActivationState(ISLAND_SLEEPING);
+	body->setActivationState(ISLAND_SLEEPING);
 
 	return 0;
 }
@@ -115,22 +141,10 @@ int RigidObject::collide(RigidObject * other, const btVector3 * worldPos)
 
 int RigidObject::applyForce(const btVector3 * vel, float m, const btVector3 * worldPos)
 {
-	/*{
-		btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
-		btVector3 force = *vel*m*5;
-
-		body->applyCentralForce(force);
-        btTransform rotate_with_body;
-        rotate_with_body.setIdentity();
-        rotate_with_body.setRotation( body->getCenterOfMassTransform().getRotation() );
-        body->applyTorque(rotate_with_body(localForce).cross(force)*body->getAngularFactor());
-		body->clearForces();
-		return 0;
-	}*/
 	btVector3 localForce = *worldPos - body->getCenterOfMassPosition();
-	btVector3 force = *vel*m*5;
+	btVector3 force = *vel*m;//*5;
 	body->activate(true);
-	body->applyForce(force, localForce);
+	body->applyImpulse(force, localForce);
 	return 0;
 }
 

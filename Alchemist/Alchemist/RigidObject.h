@@ -30,6 +30,7 @@ protected:
 	static btDiscreteDynamicsWorld * dynamicsWorld;
 	static list<RigidObject *> * physObjects;
 
+	btDefaultMotionState* myMotionState;
 	btCollisionShape* colShape;
 	btRigidBody * body;
 	bool physInit;
