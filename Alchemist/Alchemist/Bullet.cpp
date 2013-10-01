@@ -1,14 +1,15 @@
 #include "Bullet.h"
 
-Bullet::Bullet(char *fileBase, RigidObject * o, long time) : RigidObject(fileBase), dead(false), lifeSpan(60)
+Bullet::Bullet(char *fileBase, RigidObject * o, long time) : RigidObject(fileBase), damage(5.0f)
 {
 	owner = o;
 	identifier = "Bullet";
-	initTime = time;
+	health = 120;
 }
 
 Bullet::~Bullet()
 {
+	int x = 2;
 }
 
 int Bullet::initBullet()
@@ -40,8 +41,8 @@ int Bullet::initBullet()
 		
 
 	myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
-	body = new btRigidBody(rbInfo);
+	btRigidBodyEx::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
+	body = new btRigidBodyEx(&rbInfo, this);
 
 	//body->setActivationState(ISLAND_SLEEPING);
 	body->setLinearFactor(btVector3(1,1,0));
@@ -50,7 +51,6 @@ int Bullet::initBullet()
 	body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
-	physObjects->push_front(this);
 	
 	body->setGravity(btVector3(0, gravity, 0));
 	body->activate(true);
@@ -61,19 +61,20 @@ int Bullet::initBullet()
 
 int Bullet::update(long time)
 {
-	if (dead || (time - initTime) > lifeSpan) return -1;
+	health -= 1;
 	return 0;
 }
 
-int Bullet::collide(RigidObject * other, const btVector3 * worldCollPos)
+int Bullet::collide(GameObject * other, const btVector3 * worldCollPos)
 {
-	if (other != owner && other->getIndentifier() != "Bullet") 
+	if (health > 0 && other != owner && other->getIndentifier() != "Bullet") 
 	{
-		dead = true;
+		health = 0;
 		other->applyForce(&body->getLinearVelocity(), mass, worldCollPos);
+		other->modHealth(-damage);
 	}
 		
 	return 0;
 }
 
-bool Bullet::getDead() { return dead; } 
+bool Bullet::getDead() { return health <= 0; } 

@@ -16,18 +16,18 @@ public:
 	~GrappleHook();
 
 	void shoot(D3DXVECTOR3 pos, float rotation);
-	void latch(RigidObject * o);
+	void latch(GameObject * o);
 	void unlatch();
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
 	virtual int initBullet();
 
-	virtual int collide(RigidObject * other, const btVector3 * worldPos);
+	virtual int collide(GameObject * other, const btVector3 * worldPos);
 
 private:
 	Character * owner;
-	RigidObject * attatchedObject;
+	GameObject * attatchedObject;
 
 	short state;
 	GameObject line;

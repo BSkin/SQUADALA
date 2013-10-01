@@ -19,11 +19,13 @@ public:
 	GameObject(void);
 	GameObject(const char *fileBase, D3DXVECTOR3 pos = D3DXVECTOR3(0,0,0));
 	GameObject(short ID, D3DXVECTOR3 pos = D3DXVECTOR3(0,0,0));
-	~GameObject(void);
+	virtual ~GameObject(void);
 
 	static int setd3dDev(IDirect3DDevice9 *);
 	static int setAssetManager(AssetManager *);
 	static int setCamera(Camera *);
+	
+	static void setList(list<GameObject *> *);
 
 	static void setViewMatrix(D3DXMATRIX*);
 	static void setProjMatrix(D3DXMATRIX*);
@@ -54,9 +56,15 @@ public:
 	void setCurRow(short);
 	void setCurCol(short);
 
+	void modHealth(float);
+	float getHealth();
+
 	virtual int update(long time);
 	virtual int renderFrame(long time);
 	virtual int renderFrame(long time, D3DXMATRIX * trans);
+	//virtual const btCollisionObject * getBody();
+	virtual int collide(GameObject *, const btVector3 * worldCollPos);
+	virtual int applyForce(const btVector3 * velocity, float mass, const btVector3 * worldPos);
 
 protected:
 	friend class Packet;
@@ -67,6 +75,8 @@ protected:
 	
 	string directory;
 	short assetIndex;
+
+	static list<GameObject *> * objects;
 
 	//IDirect3DIndexBuffer9 *indBuf;
 	//IDirect3DVertexBuffer9 *vtxBuf;
@@ -87,6 +97,7 @@ protected:
 	short numSpriteRows, numSpriteCols, curSpriteRow, curSpriteCol;
 	bool flipSprite;
 	float rotation;
+	float health;
 
 	short ID;
 	static short currentID;

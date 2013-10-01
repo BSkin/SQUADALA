@@ -1,7 +1,5 @@
 #include "Character.h"
 
-ProjectileManager * Character::projectileManager = NULL;
-
 Character::Character(void) : RigidObject(), speed(5), direction(0,0,0)
 {
 	
@@ -51,10 +49,4 @@ void Character::moveLeft()
 void Character::moveRight()
 {
 	direction.x += 1;
-}
-
-int Character::setProjectileManager(ProjectileManager * p)
-{
-	projectileManager = p;
-	return 0;
 }

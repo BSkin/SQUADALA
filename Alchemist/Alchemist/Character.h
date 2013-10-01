@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RigidObject.h"
-#include "ProjectileManager.h"
 
 class Character : public RigidObject
 {
@@ -18,10 +17,7 @@ public:
 	virtual int update(long time);
 	virtual int renderFrame(long time);
 
-	static int setProjectileManager(ProjectileManager *);
-
 protected:
 	float speed;
 	D3DXVECTOR3 direction;
-	static ProjectileManager * projectileManager;
 };

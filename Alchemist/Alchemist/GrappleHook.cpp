@@ -50,8 +50,8 @@ int GrappleHook::initBullet()
 		
 
 	myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
-	body = new btRigidBody(rbInfo);
+	btRigidBodyEx::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
+	body = new btRigidBodyEx(&rbInfo, this);
 
 	//body->setActivationState(ISLAND_SLEEPING);
 	body->setLinearFactor(btVector3(1,1,0));
@@ -60,7 +60,6 @@ int GrappleHook::initBullet()
 	body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
-	physObjects->push_front(this);
 	
 	body->setGravity(btVector3(0, gravity, 0));
 	body->activate(true);
@@ -114,7 +113,7 @@ int GrappleHook::renderFrame(long time)
 	return 0;
 }
 
-int GrappleHook::collide(RigidObject * other, const btVector3 * worldPos)
+int GrappleHook::collide(GameObject * other, const btVector3 * worldPos)
 {
 	if (other == owner && state == LATCHED)
 	{
@@ -165,7 +164,7 @@ void GrappleHook::shoot(D3DXVECTOR3 pos, float rot)
 	}
 }
 
-void GrappleHook::latch(RigidObject * o)
+void GrappleHook::latch(GameObject * o)
 {
 	//if (state == EXTENDING)
 	//{

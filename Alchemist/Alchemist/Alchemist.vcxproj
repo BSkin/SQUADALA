@@ -149,6 +149,7 @@
     <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="BodyPart.h" />
+    <ClInclude Include="btRigidBodyEx.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="BulletDebugDrawer.h" />
     <ClInclude Include="Camera.h" />
@@ -165,9 +166,7 @@
     <ClInclude Include="MeshStructures.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Packet.h" />
-    <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="ProjectileManager.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="RawInputManager.h" />
     <ClInclude Include="RigidObject.h" />
@@ -182,6 +181,7 @@
     <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="BodyPart.cpp" />
+    <ClCompile Include="btRigidBodyEx.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="BulletDebugDrawer.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -194,9 +194,7 @@
     <ClCompile Include="MeshHierarchy.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Packet.cpp" />
-    <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="ProjectileManager.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="RawInputManager.cpp" />
     <ClCompile Include="RigidObject.cpp" />

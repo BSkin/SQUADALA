@@ -2,7 +2,6 @@
 
 btAlignedObjectArray<btCollisionShape*> *	RigidObject::collisionShapes =	NULL;
 btDiscreteDynamicsWorld *					RigidObject::dynamicsWorld =	NULL;
-list<RigidObject *> *						RigidObject::physObjects =		NULL;
 
 RigidObject::RigidObject() : GameObject(), mass(1.0f), speed(0), gravity(-9.8), physInit(false)
 {}
@@ -15,42 +14,24 @@ RigidObject::RigidObject(short ID) : GameObject(ID), mass(1.0f), speed(0), gravi
 
 RigidObject::~RigidObject()
 {
-	//if (myMotionState) delete myMotionState;
-	//myMotionState = 0;
-	{
-		//dynamicsWorld->removeCollisionObject( obj );
-		dynamicsWorld->removeRigidBody( body ); 
-		//delete myMotionState;
-		//delete body;
-
-		collisionShapes->remove(colShape);
-		delete colShape;
-	}
-	physObjects->remove(this);
-
-
-	/*if (body && body->getMotionState())
+	if (body && body->getMotionState())
 	{
 		delete body->getMotionState();
 	}
 
 	if (body) 
 	{
-		btCollisionObject * obj = body;
-		dynamicsWorld->removeCollisionObject(obj);
 		dynamicsWorld->removeRigidBody(body);
-		delete obj;
-		obj = 0;
+		delete body;
+		body = 0;
 	}
-	//delete body;
-	//body = 0;
 
 	if (colShape) 
 	{
 			collisionShapes->remove(colShape);
 			delete colShape;
 			colShape = 0;
-	}*/
+	}
 }
 
 int RigidObject::initGeom()
@@ -87,8 +68,8 @@ int RigidObject::initBullet()
 		
 
 	myMotionState = new btDefaultMotionState(startTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
-	body = new btRigidBody(rbInfo);
+	btRigidBodyEx::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
+	body = new btRigidBodyEx(&rbInfo, this);
 
 	//body->setActivationState(ISLAND_SLEEPING);
 	body->setLinearFactor(btVector3(1,1,0));
@@ -97,7 +78,6 @@ int RigidObject::initBullet()
 	//body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
-	physObjects->push_front(this);
 	
 	body->setGravity(btVector3(0, gravity/4, 0));
 	body->activate(true);
@@ -133,7 +113,7 @@ int RigidObject::renderFrame(long time)
 	return 0;
 }
 
-int RigidObject::collide(RigidObject * other, const btVector3 * worldPos)
+int RigidObject::collide(GameObject * other, const btVector3 * worldPos)
 {
 
 	return 0;
@@ -150,9 +130,8 @@ int RigidObject::applyForce(const btVector3 * vel, float m, const btVector3 * wo
 
 const btCollisionObject * RigidObject::getBody() { return body; }
 
-void RigidObject::setStatics(btAlignedObjectArray<btCollisionShape*> * col, btDiscreteDynamicsWorld * world, list<RigidObject *> * p)
+void RigidObject::setStatics(btAlignedObjectArray<btCollisionShape*> * col, btDiscreteDynamicsWorld * world)
 {
 	collisionShapes = col;
 	dynamicsWorld = world;
-	physObjects = p;
 }

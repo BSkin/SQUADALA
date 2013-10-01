@@ -58,12 +58,12 @@
 #include "AssetManager.h"
 #include "AssetLoader.h"
 #include "RawInputManager.h"
+#include "btRigidBodyEx.h"
 
 #include "GameObject.h"
 #include "RigidObject.h"
 #include "Player.h"
 #include "Camera.h"
-#include "ProjectileManager.h"
 
 using std::cin;
 using std::cout;
@@ -85,7 +85,6 @@ private:
 	#pragma region Runtime Functions
 	int update(long time);
 	int renderFrame(long time);
-	int initGround(void);
 	int cleanUp(void);
 	int cleanBullet(void);
 	#pragma endregion
@@ -107,8 +106,6 @@ private:
 
 	int setd3dDev(IDirect3DDevice9 *d3dDev);
 	
-	RigidObject * getRigidObject(const btCollisionObject *);
-
 	void changeState(int targetState);
 	short gameState;
 
@@ -189,11 +186,9 @@ private:
 	int loadScreenEffect(void);
 	
 	list<GameObject *> gameObjects;
-	list<RigidObject *> physObjects;
+	list<GameObject *> deadList;
 	list<MenuWindow *> menuObjects;
 
 	Player * player;
 	MenuWindow * crosshair;
-
-	ProjectileManager projectileManager;
 };

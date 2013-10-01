@@ -49,12 +49,6 @@
     <Filter Include="Source Files\Engine Components\Animation">
       <UniqueIdentifier>{7db568b5-6268-4379-b774-ab78279cdbf0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Engine Components\Particle System">
-      <UniqueIdentifier>{09694f9f-cf15-43b1-b2b9-bd7815016208}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Engine Components\Particle System">
-      <UniqueIdentifier>{b18a0524-a834-442c-ae1a-5a9ffa2647a3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine Components\Networking">
       <UniqueIdentifier>{e76a305b-fbbd-4cc1-a59c-13c8e874731f}</UniqueIdentifier>
     </Filter>
@@ -138,9 +132,6 @@
     <ClInclude Include="AssetLoader.h">
       <Filter>Header Files\Engine Components\Asset Manager</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleEmitter.h">
-      <Filter>Header Files\Engine Components\Particle System</Filter>
-    </ClInclude>
     <ClInclude Include="VertexCache.h">
       <Filter>Header Files\Engine Components</Filter>
     </ClInclude>
@@ -165,14 +156,14 @@
     <ClInclude Include="BodyPart.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClInclude>
-    <ClInclude Include="ProjectileManager.h">
-      <Filter>Header Files\Engine Components\Particle System</Filter>
-    </ClInclude>
     <ClInclude Include="Bullet.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClInclude>
     <ClInclude Include="GrappleHook.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="btRigidBodyEx.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -215,9 +206,6 @@
     <ClCompile Include="AssetLoader.cpp">
       <Filter>Source Files\Engine Components\Asset Manager</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleEmitter.cpp">
-      <Filter>Source Files\Engine Components\Particle System</Filter>
-    </ClCompile>
     <ClCompile Include="Packet.cpp">
       <Filter>Source Files\Engine Components\Networking</Filter>
     </ClCompile>
@@ -239,14 +227,14 @@
     <ClCompile Include="BodyPart.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClCompile>
-    <ClCompile Include="ProjectileManager.cpp">
-      <Filter>Source Files\Engine Components\Particle System</Filter>
-    </ClCompile>
     <ClCompile Include="Bullet.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClCompile>
     <ClCompile Include="GrappleHook.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="btRigidBodyEx.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

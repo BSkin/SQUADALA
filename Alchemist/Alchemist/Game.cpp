@@ -83,7 +83,7 @@ LRESULT Game::globalWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 Game::Game(HINSTANCE hInst, char* gameName) : countsPerSecond(0.0), CounterStart(0), frameCount(0), fps(0), frameTimeOld(0), frameTime(0.0), 
-												menuObjects(), gameObjects(), physObjects(), player(0), sunDir(1,-1,0), screenEffect(0),
+												menuObjects(), gameObjects(), deadList(), player(0), sunDir(1,-1,0), screenEffect(0),
 												renderSurface(NULL), backBuffer(NULL)
 { 
 	fullScreen = false;
@@ -358,9 +358,7 @@ int Game::init(void)
 	debugDrawer = new BulletDebugDrawer(d3dDev);
 	dynamicsWorld->setDebugDrawer(debugDrawer);
 	dynamicsWorld->getDebugDrawer()->setDebugMode(0);
-
-	initGround();
-
+	
 	#pragma endregion
 
 	#pragma region Set Static References
@@ -373,9 +371,9 @@ int Game::init(void)
 	GameObject::setd3dDev(d3dDev);
 	GameObject::setAssetManager(assetManager);
 	GameObject::setCamera(&camera);
-	RigidObject::setStatics(&collisionShapes, dynamicsWorld, &physObjects);
+	GameObject::setList(&gameObjects);
+	RigidObject::setStatics(&collisionShapes, dynamicsWorld);
 	Player::setInputManager(inputManager);
-	Character::setProjectileManager(&projectileManager);
 	Model::setd3dDev(d3dDev);
 	SkinnedData::setd3dDev(d3dDev);
 	MenuWindow::setStatics(&camera, wndWidth, wndHeight);
@@ -388,38 +386,6 @@ int Game::init(void)
 	_beginthreadex(NULL, 0, startLoader, NULL, NULL, NULL);		//Asset Loader
 	_beginthreadex(NULL, 0, startListener, NULL, NULL, NULL);	//Network Listener
 
-	return 0;
-}
-
-int Game::initGround()
-{
-	btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(5.),btScalar(50.),btScalar(150.)));
-//	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0,1,0),50);
-	
-	collisionShapes.push_back(groundShape);
-
-	btTransform groundTransform;
-	groundTransform.setIdentity();
-	groundTransform.setOrigin(btVector3(0,-50,0));
-
-	//We can also use DemoApplication::localCreateRigidBody, but for clarity it is provided here:
-	btScalar mass(0.);
-
-	//rigidbody is dynamic if and only if mass is non zero, otherwise static
-	bool isDynamic = (mass != 0.f);
-
-	btVector3 localInertia(0,0,0);
-	if (isDynamic)
-		groundShape->calculateLocalInertia(mass,localInertia);
-
-	//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,groundShape,localInertia);
-	btRigidBody* body = new btRigidBody(rbInfo);
-
-	//add the body to the dynamics world
-	dynamicsWorld->addRigidBody(body);
-	
 	return 0;
 }
 
@@ -529,7 +495,6 @@ int Game::update(long time)
 
 		#pragma region Update Bullet
 		dynamicsWorld->stepSimulation(1.f/60.f,1);
-		dynamicsWorld->clearForces();
 
 		//Assume world->stepSimulation or world->performDiscreteCollisionDetection has been called
  
@@ -537,8 +502,8 @@ int Game::update(long time)
 		for (int i=0;i<numManifolds;i++)
 		{
 			btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-			const btCollisionObject* obA = static_cast<const btCollisionObject*>(contactManifold->getBody0());
-			const btCollisionObject* obB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
+			const btCollisionObject * obA = (contactManifold->getBody0());
+			const btCollisionObject * obB = (contactManifold->getBody1());
  
 			int numContacts = contactManifold->getNumContacts();
 			for (int j=0;j<numContacts;j++)
@@ -546,11 +511,17 @@ int Game::update(long time)
 				btManifoldPoint& pt = contactManifold->getContactPoint(j);
 				if (pt.getDistance()<0.f)
 				{
-					RigidObject * physA = getRigidObject(obA);
-					RigidObject * physB = getRigidObject(obB);
+					const btRigidBody * pA = btRigidBody::upcast(obA);
+					const btRigidBody * pB = btRigidBody::upcast(obB);
 
-					physA->collide(physB, &pt.getPositionWorldOnB());
-					physB->collide(physA, &pt.getPositionWorldOnA());
+					btRigidBodyEx * physA = (btRigidBodyEx *)(pA);
+					btRigidBodyEx * physB = (btRigidBodyEx *)(pB);
+
+					physA->getOwner()->collide(physB->getOwner(), &pt.getPositionWorldOnB());
+					physB->getOwner()->collide(physA->getOwner(), &pt.getPositionWorldOnA());
+					
+					//physA->collide(physB, &pt.getPositionWorldOnB());
+					//physB->collide(physA, &pt.getPositionWorldOnA());
 				}
 			}
 		}
@@ -617,10 +588,24 @@ int Game::update(long time)
 
 		list<GameObject *>::iterator iter;
 		for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
+		{
 			(*iter)->update(time);
+			if ((*iter)->getHealth() <= 0) deadList.push_back(*iter);
+		}
 
-		projectileManager.update(time);
-
+		list<GameObject *>::iterator iter0;
+		for (iter0 = deadList.begin(); iter0 != deadList.end(); iter0++)
+		{
+			//(*iter0)->update(time);
+			if (*iter0)
+			{
+				gameObjects.remove(*iter0);
+				delete *iter0;
+				*iter0 = 0;
+			}
+		}
+		deadList.clear();
+		
 		//player->setPosition(0, 10, 0);
 		//camera.setPosition(player->getPosition());	
 	}
@@ -650,9 +635,7 @@ int Game::renderFrame(long time)
 
 	list<GameObject *>::iterator iter;
 	for (iter = gameObjects.begin(); iter != gameObjects.end(); iter++)
-		(*iter)->renderFrame(time); 
-
-	projectileManager.render(time);
+		(*iter)->renderFrame(time);
 	/*
 	d3dDev->SetRenderState(D3DRS_FILLMODE,D3DFILL_WIREFRAME);
 	//draw debug wireframe stuff
@@ -780,7 +763,6 @@ int Game::renderFrame(long time)
 	s += std::to_string(fps);
 	s += "\nActive: ";
 	s += activeWindow ? "true" : "false";
-	s += "\nNumber of Bullets: " + std::to_string(projectileManager.getSize());
 
 	font->DrawTextA(NULL, s.c_str(), -1, &tr, DT_TOP | DT_LEFT, D3DCOLOR_ARGB(255,255,0,0));
 	#pragma endregion
@@ -904,9 +886,7 @@ void Game::changeState(int targetState)
 		*iter2 = 0;
 	}
 	menuObjects.clear();
-
-	projectileManager.clearList();
-
+	
 	cleanBullet();
 
 	camera.setPosition(0,0,0);
@@ -958,7 +938,7 @@ void Game::changeState(int targetState)
 			GameObject * tempObj = temp;
 			gameObjects.push_front(tempObj);
 		}
-
+	
 		RigidObject * ground = new RigidObject("Assets\\terr.png");
 		ground->setMass(0);
 		ground->setSize(1300,300);
@@ -966,6 +946,7 @@ void Game::changeState(int targetState)
 		GameObject * groundObj = ground;
 		gameObjects.push_front(groundObj);
 		
+
 		MenuWindow * healthBars = new MenuWindow("Assets\\HealthTemp.png");
 		healthBars->setSize(300,75);
 		healthBars->setPosition(50, 50, BOT_LEFT);
@@ -1007,16 +988,6 @@ int Game::resizeWindow(int width, int height)
 	//d3dDev->Reset(md3dpp);
 
 	return 0;
-}
-
-RigidObject * Game::getRigidObject(const btCollisionObject * b)
-{
-	list<RigidObject *>::iterator iter;
-	for (iter = physObjects.begin(); iter != physObjects.end(); iter++)
-	{
-		if ((*iter)->getBody() == b) 
-			return (*iter);
-	}
 }
 
 #pragma region Framerate Functions

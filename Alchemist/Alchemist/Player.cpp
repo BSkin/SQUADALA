@@ -67,7 +67,7 @@ int Player::initBullet()
 
 	myMotionState = new btDefaultMotionState(startTransform);
 	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,colShape,localInertia);
-	body = new btRigidBody(rbInfo);
+	body = new btRigidBodyEx(&rbInfo, this);
 
 	//body->setActivationState(ISLAND_SLEEPING);
 	body->setLinearFactor(btVector3(1,1,0));
@@ -76,7 +76,6 @@ int Player::initBullet()
 	//body->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 	dynamicsWorld->addRigidBody(body);
-	physObjects->push_front(this);
 	
 	body->setGravity(btVector3(0, gravity, 0));
 	body->activate(true);
@@ -136,7 +135,8 @@ int Player::update(long time)
 			bullet->setRotation(frontArms->getRotation());
 			bullet->setSpeed(20);
 			bullet->setGravity(0);
-			projectileManager->addObject(bullet);
+			//projectileManager->addObject(bullet);
+			objects->push_front(bullet);
 		}
 	}
 	else if (weapon == WEP_RIFLE)
@@ -153,7 +153,8 @@ int Player::update(long time)
 			bullet->setRotation(frontArms->getRotation());
 			bullet->setSpeed(20);
 			bullet->setGravity(0);
-			projectileManager->addObject(bullet);
+			//->addObject(bullet);
+			objects->push_front(bullet);
 		}
 	}
 	else if (weapon == WEP_SHOTGUN)
@@ -176,7 +177,8 @@ int Player::update(long time)
 				bullet->setRotation(frontArms->getRotation() + r);
 				bullet->setSpeed(20);
 				bullet->setGravity(0);
-				projectileManager->addObject(bullet);
+				//projectileManager->addObject(bullet);
+				objects->push_front(bullet);
 			}
 		}	
 	}
@@ -274,7 +276,7 @@ int Player::setInputManager(RawInputManager * iManager)
 
 void Player::setCursorPos(double x, double y) { cursorX = x; cursorY = y;}
 
-int Player::collide(RigidObject * obj, const btVector3 * worldPos)
+int Player::collide(GameObject * obj, const btVector3 * worldPos)
 {
 	if (obj->getIndentifier() != "Bullet") onGround = true;
 	return 0;

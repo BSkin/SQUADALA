@@ -54,6 +54,7 @@ float4 ShaderPS(PixelData vin) : COLOR
 	u += curSpriteCol/numSpriteCols;
 	v += curSpriteRow/numSpriteRows;
 	vin.col = tex2D(TexS, float2(u,v));
+
 	return(vin.col);
 }
 

@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Engine Components">
+      <UniqueIdentifier>{42526ca8-6c94-4321-bb36-b9bb8f7c660c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components">
+      <UniqueIdentifier>{1ceaa504-0bd6-48ac-bd83-0620cafa906a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{2ca356fd-0771-40c0-874a-92619231f69d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Asset Manager">
+      <UniqueIdentifier>{ddab2300-3abb-4b9f-87c7-d9107124e72d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Templates">
+      <UniqueIdentifier>{e5c2c155-c3dc-4bea-9711-91c4d2446f20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Input Manager">
+      <UniqueIdentifier>{f83f00a1-63fe-4aae-83f2-4b4d81fdcb93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components\Input Manager">
+      <UniqueIdentifier>{f423503d-7f05-4d4b-bb95-d4c7c13c5853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components\Asset Manager">
+      <UniqueIdentifier>{78ce9d6d-abfb-46b6-a038-fd2f35a9d206}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Utilities">
+      <UniqueIdentifier>{c622c6c2-6ffd-4530-9a7b-fefb8e97376c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components\Utilities">
+      <UniqueIdentifier>{ffac431f-6c99-4cc1-b961-da5e5d2fe9a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Engine Objects">
+      <UniqueIdentifier>{0bfce52d-3e90-4400-83a3-c75f7e014319}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components\Engine Objects">
+      <UniqueIdentifier>{b0b5e2a7-5287-443c-9390-1c9a780fc273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine Components\Engine Objects\Game Objects">
+      <UniqueIdentifier>{56e039c9-d1af-4be0-b807-c44486dc112f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine Components\Engine Objects\Game Objects">
+      <UniqueIdentifier>{b71a926d-4687-4e70-9fb4-740310fe7589}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Alchemist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Quad.h">
+      <Filter>Header Files\Engine Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files\Engine Components</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>Header Files\Engine Components\Asset Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Header Files\Engine Components\Asset Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\Engine Components\Asset Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexedNode.h">
+      <Filter>Header Files\Engine Components\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexedList.h">
+      <Filter>Header Files\Engine Components\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="DInputManager.h">
+      <Filter>Header Files\Engine Components\Input Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="RawInputManager.h">
+      <Filter>Header Files\Engine Components\Input Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="stdh.h">
+      <Filter>Header Files\Engine Components\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Header Files\Engine Components\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetLoader.h">
+      <Filter>Header Files\Engine Components\Asset Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexCache.h">
+      <Filter>Header Files\Engine Components</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuWindow.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Alchemist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Quad.cpp">
+      <Filter>Source Files\Engine Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Engine Components</Filter>
+    </ClCompile>
+    <ClCompile Include="DInputManager.cpp">
+      <Filter>Source Files\Engine Components\Input Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="RawInputManager.cpp">
+      <Filter>Source Files\Engine Components\Input Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>Source Files\Engine Components\Asset Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Source Files\Engine Components\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetLoader.cpp">
+      <Filter>Source Files\Engine Components\Asset Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuWindow.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Phantom.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="SkeletalAnimation.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="Actor.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="Quad.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="Ocean.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+    <Text Include="FullScreen.hlsl">
+      <Filter>Source Files\Shaders</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

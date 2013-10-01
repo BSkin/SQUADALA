@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameObject.h"
+#include "btRigidBodyEx.h"
 
 class RigidObject : public GameObject
 {
@@ -8,31 +9,30 @@ public:
 	RigidObject(void);
 	RigidObject(char *fileBase);
 	RigidObject(short ID);
-	~RigidObject(void);
+	virtual ~RigidObject(void);
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
-	virtual int collide(RigidObject *, const btVector3 * worldCollPos);
+	virtual int collide(GameObject *, const btVector3 * worldCollPos);
 	virtual int applyForce(const btVector3 * velocity, float mass, const btVector3 * worldPos);
 
-	const btCollisionObject * getBody();
+	virtual const btCollisionObject * getBody();
 	//virtual D3DXVECTOR3 getPosition();
 
 	void setMass(float x);
 	void setSpeed(float x);
 	void setGravity(float x);
-	static void setStatics(btAlignedObjectArray<btCollisionShape*> *, btDiscreteDynamicsWorld *, list<RigidObject *> *);
+	static void setStatics(btAlignedObjectArray<btCollisionShape*> *, btDiscreteDynamicsWorld *);
 protected:
 	virtual int initGeom();
 	virtual int initBullet();
 
 	static btAlignedObjectArray<btCollisionShape*> * collisionShapes;
 	static btDiscreteDynamicsWorld * dynamicsWorld;
-	static list<RigidObject *> * physObjects;
 
 	btDefaultMotionState* myMotionState;
 	btCollisionShape* colShape;
-	btRigidBody * body;
+	btRigidBodyEx * body;
 	bool physInit;
 
 	btScalar mass;

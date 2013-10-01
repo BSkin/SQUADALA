@@ -7,14 +7,17 @@ Camera *			GameObject::camera =			NULL;
 D3DXMATRIX *		GameObject::viewMatrix =		NULL;
 D3DXMATRIX *		GameObject::projMatrix =		NULL;
 short				GameObject::currentID =			0;
+list<GameObject *> *GameObject::objects =			NULL;
 
-GameObject::GameObject(void) : width(100), height(100), position(0,0,1), renderPosition(0,0,0), identifier(""),
+GameObject::GameObject(void) : width(100), height(100), position(0,0,1), renderPosition(0,0,0), identifier(""), health(1), 
 	velocity(0,0,0), acceleration(0,0,0), texture(NULL),
 	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
-{ }
+{ 
+	//objects->push_back(this);
+}
 
-GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0), identifier(""),
+GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0), identifier(""), health(1),
 	velocity(0,0,0), acceleration(0,0,0), texture(NULL),
 	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
@@ -24,9 +27,10 @@ GameObject::GameObject(const char * fileBase, D3DXVECTOR3 pos) : width(100), hei
 	assetIndex = assetManager->getAssetIndex(directory.c_str());
 	offset = (rand() % 100);
 	ID = currentID++;
+	//objects->push_back(this);
 }
 
-GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0), identifier(""),
+GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), position(0,0,1), renderPosition(0,0,0), identifier(""), health(1),
 	velocity(0,0,0), acceleration(0,0,0), texture(NULL),
 	actorShader(0), assetIndex(-1), numSpriteCols(1), numSpriteRows(1), curSpriteCol(0), curSpriteRow(0), flipSprite(FALSE), rotation(0.0f),
 	hMatrix(NULL), hTexture(NULL), hNumSpriteCols(NULL), hNumSpriteRows(NULL), hCurSpriteCol(NULL), hCurSpriteRow(NULL), hFlipSprite(NULL), hTechnique(NULL)
@@ -36,11 +40,12 @@ GameObject::GameObject(short id, D3DXVECTOR3 pos) : width(100), height(100), pos
 	assetIndex = id;
 	offset = (rand() % 100);
 	ID = currentID++;
+	//objects->push_back(this);
 }
 
 GameObject::~GameObject()
 {
-
+	int x = 2;
 }
 
 int GameObject::initGeom()
@@ -252,6 +257,18 @@ int GameObject::renderFrame(long time, D3DXMATRIX * trans)
 	return 0;
 }
 
+int GameObject::collide(GameObject * other, const btVector3 * worldPos)
+{
+
+	return 0;
+}
+
+int GameObject::applyForce(const btVector3 * velocity, float mass, const btVector3 * worldPos)
+{
+
+	return 0;
+}
+
 D3DXVECTOR3 GameObject::getPosition() { return position; }
 
 void GameObject::modVelocity(D3DXVECTOR3 x) { velocity += x; }
@@ -261,6 +278,9 @@ float GameObject::getWidth() { return width; }
 float GameObject::getHeight() { return height; }
 float GameObject::getRotation() { return rotation; }
 const string GameObject::getIndentifier() { return identifier; }
+
+void GameObject::modHealth(float x) { health += x; }
+float GameObject::getHealth() { return health; }
 
 #pragma region Set Functions
 void GameObject::setPosition(D3DXVECTOR3 pos) { position = pos*0.01f; }
@@ -307,6 +327,7 @@ int GameObject::setCamera(Camera * cam)
 
 void GameObject::setViewMatrix(D3DXMATRIX * matrix) { viewMatrix = matrix; }
 void GameObject::setProjMatrix(D3DXMATRIX * matrix) { projMatrix = matrix; }
+void GameObject::setList(list<GameObject *> * gol) { objects = gol; }
 void GameObject::setMatrices(D3DXMATRIX * view, D3DXMATRIX * proj)
 {
 	setViewMatrix(view);
