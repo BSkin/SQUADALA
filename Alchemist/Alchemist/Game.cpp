@@ -763,6 +763,8 @@ int Game::renderFrame(long time)
 	s += std::to_string(fps);
 	s += "\nActive: ";
 	s += activeWindow ? "true" : "false";
+	s += "\nGameObjects: ";
+	s += std::to_string(gameObjects.size());
 
 	font->DrawTextA(NULL, s.c_str(), -1, &tr, DT_TOP | DT_LEFT, D3DCOLOR_ARGB(255,255,0,0));
 	#pragma endregion
@@ -911,8 +913,16 @@ void Game::changeState(int targetState)
 		player = new Player();
 		player->setPosition(0,0,0);
 		player->setSize(100, 100);
+		player->setMass(5);
 		GameObject * p = player;
 		gameObjects.push_front(p);
+
+		Human * en1 = new Human("Assets\\Player\\Leg Sprites.png");
+		en1->setPosition(-300, 0, 0);
+		en1->setSize(100, 100);
+		en1->setMass(3);
+		GameObject * en1Obj = en1;
+		gameObjects.push_front(en1Obj);
 
 		float x;
 		float y;
@@ -920,7 +930,7 @@ void Game::changeState(int targetState)
 
 		for (int i = 0; i < 25; i++)
 		{
-			RigidObject * temp = new RigidObject("Assets\\crate.png");
+			DestructibleObject * temp = new DestructibleObject("Assets\\crate.png");
 
 			x = rand() % 100;
 			y = rand() % 100;

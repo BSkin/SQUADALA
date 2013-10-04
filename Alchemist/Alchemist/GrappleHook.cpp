@@ -1,7 +1,7 @@
 #include "GrappleHook.h"
 
-GrappleHook::GrappleHook(Character * o) : RigidObject("Assets\\Player\\Crosshair.png"), state(IDLE),
-								owner(NULL), attatchedObject(NULL), line("Assets\\pixeltest.png")
+GrappleHook::GrappleHook(Character * o) : RigidObject("Assets\\Player\\Hook.png"), state(IDLE),
+								owner(NULL), attatchedObject(NULL), line("Assets\\Player\\Hook Wire.png")
 {
 	owner = o;
 	identifier = "Hook";
@@ -86,12 +86,9 @@ int GrappleHook::update(long time)
 
 int GrappleHook::renderFrame(long time)
 {
-	//RigidObject::renderFrame(time);
+	if (!physInit) RigidObject::renderFrame(time);
 	if (state != IDLE)
 	{
-		//hook->renderFrame(time);
-		RigidObject::renderFrame(time);
-
 		float x = sqrt(
 			pow(position.x - owner->getPosition().x,2) + 
 			pow(position.y - owner->getPosition().y,2));
@@ -109,6 +106,7 @@ int GrappleHook::renderFrame(long time)
 		line.setPosition(pos*100);
 
 		line.renderFrame(time);
+		RigidObject::renderFrame(time);
 	}
 	return 0;
 }

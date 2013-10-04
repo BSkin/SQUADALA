@@ -1,16 +1,16 @@
 #include "Character.h"
 
-Character::Character(void) : RigidObject(), speed(5), direction(0,0,0)
+Character::Character(void) : DestructibleObject(), speed(5), direction(0,0,0)
 {
 	
 }
 
-Character::Character(char *fileBase) : RigidObject(fileBase), speed(5), direction(0,0,0)
+Character::Character(char *fileBase) : DestructibleObject(fileBase), speed(5), direction(0,0,0)
 {
 	position = D3DXVECTOR3(0,0,0);
 }
 
-Character::Character(short ID) : RigidObject(ID), speed(5), direction(0,0,0)
+Character::Character(short ID) : DestructibleObject(ID), speed(5), direction(0,0,0)
 {
 	
 }
@@ -22,12 +22,12 @@ Character::~Character(void)
 
 int Character::update(long time)
 {
-	return RigidObject::update(time);
+	return DestructibleObject::update(time);
 }
 
 int Character::renderFrame(long time)
 {
-	RigidObject::renderFrame(time);
+	DestructibleObject::renderFrame(time);
 	return 0;
 }
 

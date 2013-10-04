@@ -163,7 +163,16 @@
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClInclude>
     <ClInclude Include="btRigidBodyEx.h">
+      <Filter>Header Files\Engine Components\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="DestructibleObject.h">
       <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Human.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Weapon.h">
+      <Filter>Header Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -234,7 +243,16 @@
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClCompile>
     <ClCompile Include="btRigidBodyEx.cpp">
+      <Filter>Source Files\Engine Components\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="DestructibleObject.cpp">
       <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Human.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Weapon.cpp">
+      <Filter>Source Files\Engine Components\Engine Objects\Game Objects\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

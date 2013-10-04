@@ -62,6 +62,7 @@
 
 #include "GameObject.h"
 #include "RigidObject.h"
+#include "DestructibleObject.h"
 #include "Player.h"
 #include "Camera.h"
 

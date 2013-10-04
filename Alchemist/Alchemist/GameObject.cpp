@@ -279,8 +279,14 @@ float GameObject::getHeight() { return height; }
 float GameObject::getRotation() { return rotation; }
 const string GameObject::getIndentifier() { return identifier; }
 
-void GameObject::modHealth(float x) { health += x; }
-float GameObject::getHealth() { return health; }
+void GameObject::modHealth(float x) 
+{ 
+	//health += x; 
+}
+float GameObject::getHealth() 
+{ 
+	return health; 
+}
 
 #pragma region Set Functions
 void GameObject::setPosition(D3DXVECTOR3 pos) { position = pos*0.01f; }

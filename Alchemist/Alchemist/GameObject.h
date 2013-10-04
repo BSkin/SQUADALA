@@ -56,13 +56,13 @@ public:
 	void setCurRow(short);
 	void setCurCol(short);
 
-	void modHealth(float);
-	float getHealth();
+	virtual void modHealth(float);
+	virtual float getHealth();
 
 	virtual int update(long time);
 	virtual int renderFrame(long time);
 	virtual int renderFrame(long time, D3DXMATRIX * trans);
-	//virtual const btCollisionObject * getBody();
+
 	virtual int collide(GameObject *, const btVector3 * worldCollPos);
 	virtual int applyForce(const btVector3 * velocity, float mass, const btVector3 * worldPos);
 
