@@ -1,2 +1,2 @@
 # SQUADALA
-An old prototype build with DirectX 9.
+An old prototype built with DirectX 9.
